@@ -1,30 +1,20 @@
+/* eslint-disable no-console */
 const execa = require("execa");
-const emoji = require("node-emoji");
-const chalk = require("chalk");
-
-const firstLog = emoji.get("fast_forward") + " " + chalk.yellow("Building...");
-const secondLog = emoji.get("fast_forward") + " " + chalk.yellow("Pushing...");
-const thirdLog =
-  emoji.get("rocket") +
-  " " +
-  chalk.green("Your app successfully deployed") +
-  " " +
-  emoji.get("rocket");
-
-(async () => {
+const fs = require("fs");
+void (async () => {
   try {
-    await execa.command('git checkout --orphan gh-pages')
-    console.log(firstLog);
-    await execa.command('quasar build')
-    await execa.command('git --work-tree dist/spa add --all')
-    await execa.command('git --work-tree dist/spa commit -m "gh-pages"')
-    console.log(secondLog);
-    await execa.command('git push origin HEAD:gh-pages --force')
-    await execa.command('rm -r dist/spa')
-    await execa.command('git checkout -f master')
-    await execa.command('git branch -D gh-pages')
-    console.log(thirdLog);
+    await execa("git", ["checkout", "--orphan", "gh-pages"]);
+    const folderName = fs.existsSync("dist/spa") ? "dist/spa" : "build";
+    await execa("git", ["--work-tree", folderName, "add", "--all"]);
+    await execa("git", ["--work-tree", folderName, "commit", "-m", "gh-pages"]);
+    console.log("Pushing to gh-pages...");
+    await execa("git", ["push", "origin", "HEAD:gh-pages", "--force"]);
+    await execa("rm", ["-r", folderName]);
+    await execa("git", ["checkout", "-f", "master"]);
+    await execa("git", ["branch", "-D", "gh-pages"]);
+    console.log("Successfully deployed, check your settings");
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.log(e.message);
     process.exit(1);
   }

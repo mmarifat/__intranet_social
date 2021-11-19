@@ -5026,13 +5026,6 @@ qs@6.7.0:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.7.0.tgz#41dc1a015e3d581f1621776be31afb2876a9b1bc"
   integrity sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
 
-quasar-app-extension-gh-pages-auto-deploy@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/quasar-app-extension-gh-pages-auto-deploy/-/quasar-app-extension-gh-pages-auto-deploy-0.2.0.tgz#4a3c06e17409f8fa861ca3e8a71fc04cc0ad494c"
-  integrity sha512-sHECbPoR2yelVsA1Slg78GLsBAosQh3+mVi5MqdLv5MAwCvDUoR095txFY8oAgYLWchlafbjfB1XsDDGqW9tHA==
-  dependencies:
-    execa "^4.0.0"
-
 quasar@^2.0.0:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/quasar/-/quasar-2.3.2.tgz#c321c2424e05bcba6ea94e8b0252bf16b34a8571"

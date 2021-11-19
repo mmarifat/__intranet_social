@@ -27,10 +27,7 @@
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^7.0.0",
-    "quasar-app-extension-gh-pages-auto-deploy": "^0.2.0",
-    "chalk": "^4.0.0",
-    "execa": "^4.0.0",
-    "node-emoji": "^1.10.0"
+    "execa": "^4.0.0"
   },
   "browserslist": [
     "last 10 Chrome versions",
