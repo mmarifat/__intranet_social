@@ -12,7 +12,7 @@ const { configure } = require('quasar/wrappers');
 
 module.exports = configure(function (ctx) {
   return {
-    publicPath:'__hybrid_social',
+		publicPath: process.env.NODE_ENV === 'production' ? '/__hybrid_social/' : '/',
     // https://quasar.dev/quasar-cli/supporting-ts
     supportTS: {
       tsCheckerConfig: {
