@@ -26,14 +26,20 @@ export default defineComponent({
 
     const links = ref<SocialLinkInterface[]>([
       {
+        label: 'Google',
+        link: 'https://www.google.com/webhp?igu=1',
+        caption: '@google',
+        icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/1200px-Google_%22G%22_Logo.svg.png'
+      },
+      {
         label: 'Youtube',
-        link: 'https://www.youtube.com',
+        link: 'https://www.youtube.com/webhp?igu=1',
         caption: '@youtube',
         icon: 'https://cliply.co/wp-content/uploads/2019/04/371903520_SOCIAL_ICONS_YOUTUBE.png'
       },
       {
         label: 'Facebook',
-        link: 'https://www.facebook.com',
+        link: 'https://www.facebook.com/webhp?igu=1',
         caption: '@facebook',
         icon: 'https://cdn3.iconfinder.com/data/icons/capsocial-round/500/facebook-512.png'
       },
