@@ -1,0 +1,7 @@
+{
+  "appId": "com.intranet.social",
+  "appName": "Intranet Social",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "webDir": "www"
+}

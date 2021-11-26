@@ -1,6 +1,7 @@
 export interface SocialLinkInterface {
-  label: string;
-  link: string;
-  caption: string;
-  icon?: string;
+    label: string;
+    link: string;
+    caption: string;
+    icon?: string;
+    mobileOnly: boolean;
 }

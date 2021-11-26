@@ -12,7 +12,7 @@ const { configure } = require('quasar/wrappers');
 
 module.exports = configure(function (ctx) {
   return {
-		publicPath: process.env.NODE_ENV === 'production' ? '/__hybrid_social/' : '/',
+		publicPath: process.env.NODE_ENV === 'production' ? '/__intranet_social/' : '/',
     // https://quasar.dev/quasar-cli/supporting-ts
     supportTS: {
       tsCheckerConfig: {
@@ -144,9 +144,9 @@ module.exports = configure(function (ctx) {
       },
 
       manifest: {
-        name: 'A hybrid social web',
-        short_name: 'A hybrid social web',
-        description: 'Hybrid Social Application with referral',
+        name: 'A intranet social web',
+        short_name: 'A intranet social web',
+        description: 'Intranet Social Application with referral',
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#ffffff',
@@ -211,7 +211,7 @@ module.exports = configure(function (ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'hybrid_social'
+        appId: 'intranet_social'
       },
 
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain

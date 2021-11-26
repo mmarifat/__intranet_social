@@ -1,15 +1,16 @@
 {
-  "name": "hybrid_social",
+  "name": "intranet_social",
   "version": "0.0.1",
-  "description": "Hybrid Social Application with referral",
-  "productName": "Hybrid Social",
+  "description": "Intranet Social Application with referral",
+  "productName": "Intranet Social",
   "author": "mmarifat <mma.rifat66@gmail.com>",
   "private": true,
   "scripts": {
     "dev": "quasar dev",
+    "dev:android": "quasar dev -m capacitor -T android",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
-    "gh-pages-deploy": "node scripts/gh-pages-deploy.js"
+    "setup": "yarn install && cd src-capacitor && yarn install"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

@@ -1,0 +1,12 @@
+{
+  "name": "intranet_social",
+  "version": "0.0.1",
+  "description": "Intranet Social Application with referral",
+  "author": "mmarifat <mma.rifat66@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "2.5.0",
+    "@capacitor/cli": "^2.0.0",
+    "@capacitor/core": "^2.0.0"
+  }
+}

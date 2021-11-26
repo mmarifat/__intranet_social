@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Intranet Social</string>
+    <string name="title_activity_main">Intranet Social</string>
+    <string name="package_name">com.intranet.social</string>
+    <string name="custom_url_scheme">com.intranet.social</string>
+</resources>

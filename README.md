@@ -1,6 +1,6 @@
-# A hybrid social web (hybrid_social)
+# A intranet social web (intranet_social)
 
-Hybrid Social Application with referral
+Intranet Social Application with referral
 
 ## Install the dependencies
 ```bash

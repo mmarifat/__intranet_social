@@ -13,52 +13,47 @@ import {SocialLinkInterface} from 'src/interfaces/social-link.interface';
  */
 
 export interface StateInterface {
-  // Define your own store structure, using submodules if needed
-  // example: ExampleStateInterface;
-  // Declared as unknown to avoid linting issue. Best to strongly type as per the line above.
-  leftDrawer: boolean
-  socialLink: SocialLinkInterface
+    // Define your own store structure, using submodules if needed
+    // example: ExampleStateInterface;
+    // Declared as unknown to avoid linting issue. Best to strongly type as per the line above.
+    socialLink: SocialLinkInterface
 }
 
 // provide typings for `this.$store`
 declare module '@vue/runtime-core' {
-  interface ComponentCustomProperties {
-    $store: VuexStore<StateInterface>
-  }
+    interface ComponentCustomProperties {
+        $store: VuexStore<StateInterface>
+    }
 }
 
 // provide typings for `useStore` helper
 export const storeKey: InjectionKey<VuexStore<StateInterface>> = Symbol('vuex-key')
 
 export default store(function (/* { ssrContext } */) {
-  return createStore<StateInterface>({
-    state: {
-      leftDrawer: false,
-      socialLink: {
-        link: '',
-        icon: '',
-        label: '',
-        caption: '',
-      }
-    },
-    mutations: {
-      SET_LEFT_DRAWER(state) {
-        state.leftDrawer = !state.leftDrawer;
-      },
-      SET_SOCIAL_LINK(state, payload) {
-        state.socialLink = payload;
-      }
-    },
-    getters: {
-      getLeftDrawer: state => state.leftDrawer,
-      getSocialLink: state => state.socialLink
-    },
-    // enable strict mode (adds overhead!)
-    // for dev mode and --debug builds only
-    strict: !!process.env.DEBUGGING
-  });
+    return createStore<StateInterface>({
+        state: {
+            socialLink: {
+                link: '',
+                icon: '',
+                label: '',
+                caption: '',
+                mobileOnly: true
+            }
+        },
+        mutations: {
+            SET_SOCIAL_LINK(state, payload) {
+                state.socialLink = payload;
+            }
+        },
+        getters: {
+            getSocialLink: state => state.socialLink
+        },
+        // enable strict mode (adds overhead!)
+        // for dev mode and --debug builds only
+        strict: !!process.env.DEBUGGING
+    });
 })
 
 export function useStore() {
-  return vuexUseStore(storeKey)
+    return vuexUseStore(storeKey)
 }

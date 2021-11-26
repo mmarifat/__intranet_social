@@ -1,0 +1,10 @@
+{
+  "appId": "com.intranet.social",
+  "appName": "Intranet Social",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "webDir": "www",
+  "server": {
+    "url": "http://192.168.6.3:9090"
+  }
+}
