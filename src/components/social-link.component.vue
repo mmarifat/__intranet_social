@@ -52,7 +52,7 @@ export default defineComponent({
             $store.commit('SET_SOCIAL_LINK', link)
             await Plugins.Browser.open({
                 url: link.link
-            })
+            });
         }
 
         return {links, changeLink}
