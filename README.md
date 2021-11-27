@@ -4,12 +4,12 @@ Intranet Social Application with referral
 
 ## Install the dependencies
 ```bash
-yarn
+yarn setup
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 ```bash
-quasar dev
+yarn dev:android
 ```
 
 ### Lint the files
@@ -19,7 +19,7 @@ yarn run lint
 
 ### Build the app for production
 ```bash
-quasar build
+yarn build:android
 ```
 
 ### Customize the configuration

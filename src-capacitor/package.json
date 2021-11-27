@@ -1,8 +1,12 @@
 {
   "name": "intranet_social",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Intranet Social Application with referral",
-  "author": "mmarifat <mma.rifat66@gmail.com>",
+  "author": {
+    "name": "mmarifat",
+    "email": "mma.rifat66@gmail.com",
+    "url": "github.com/mmarifat"
+  },
   "private": true,
   "dependencies": {
     "@capacitor/android": "2.5.0",
