@@ -3,5 +3,15 @@
   "appName": "Intranet Social",
   "bundledWebRuntime": false,
   "npmClient": "yarn",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": [
+        "profile",
+        "email"
+      ],
+      "serverClientId": "1012906361085-t1mu0t515samulp27uurmijenh3b016g.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
 }

@@ -10,11 +10,11 @@
         "profile",
         "email"
       ],
-      "serverClientId": "1051956975133-6f1l0ggtt3h8qgc4j16beq9kl221s66g.apps.googleusercontent.com",
+      "serverClientId": "1012906361085-t1mu0t515samulp27uurmijenh3b016g.apps.googleusercontent.com",
       "forceCodeForRefreshToken": true
     }
   },
   "server": {
-    "url": "http://192.168.43.155:9090"
+    "url": "http://192.168.6.5:9090"
   }
 }

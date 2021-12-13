@@ -4,4 +4,6 @@
     <string name="title_activity_main">Intranet Social</string>
     <string name="package_name">com.intranet.social</string>
     <string name="custom_url_scheme">com.intranet.social</string>
+    <string name="android_client_id">1012906361085-t1mu0t515samulp27uurmijenh3b016g.apps.googleusercontent.com</string>
+    <string name="server_client_id">1012906361085-t1mu0t515samulp27uurmijenh3b016g.apps.googleusercontent.com</string>
 </resources>

@@ -14,6 +14,7 @@ const routes: RouteRecordRaw[] = [
         children: [
             {
                 path: '',
+                name: 'dashboard',
                 component: () => import('pages/dashboard.page.vue'),
                 meta: {
                     title: 'Dashboard'
