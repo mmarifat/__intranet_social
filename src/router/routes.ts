@@ -1,8 +1,9 @@
-import { RouteRecordRaw } from 'vue-router';
+import {RouteRecordRaw} from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
     {
         path: '/',
+        name: 'login',
         component: () => import('pages/login.page.vue'),
         meta: {
             title: 'Login'
@@ -14,6 +15,7 @@ const routes: RouteRecordRaw[] = [
         children: [
             {
                 path: '',
+                name: 'dashboard',
                 component: () => import('pages/dashboard.page.vue'),
                 meta: {
                     title: 'Dashboard'

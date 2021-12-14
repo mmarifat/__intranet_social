@@ -16,8 +16,8 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import {useStore} from 'src/store';
-import {SocialLinkInterface} from 'src/interfaces/social-link.interface';
-import {Plugins} from '../../src-capacitor/node_modules/@capacitor/core';
+import {SocialLinkInterface} from 'src/custom/interfaces/social-link.interface';
+import {Browser} from '../../src-capacitor/node_modules/@capacitor/browser';
 
 export default defineComponent({
     name: 'SocialLinkComponent',
@@ -50,7 +50,7 @@ export default defineComponent({
 
         const changeLink = async (link: SocialLinkInterface) => {
             $store.commit('SET_SOCIAL_LINK', link)
-            await Plugins.Browser.open({
+            await Browser.open({
                 url: link.link
             });
         }

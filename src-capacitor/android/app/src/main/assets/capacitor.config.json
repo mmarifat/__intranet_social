@@ -1,20 +1,21 @@
 {
-  "appId": "com.intranet.social",
-  "appName": "Intranet Social",
-  "bundledWebRuntime": false,
-  "npmClient": "yarn",
-  "webDir": "www",
-  "plugins": {
-    "GoogleAuth": {
-      "scopes": [
-        "profile",
-        "email"
-      ],
-      "serverClientId": "1051956975133-6f1l0ggtt3h8qgc4j16beq9kl221s66g.apps.googleusercontent.com",
-      "forceCodeForRefreshToken": true
-    }
-  },
-  "server": {
-    "url": "http://192.168.43.155:9090"
-  }
+	"appId": "com.intranet.social",
+	"appName": "Intranet Social",
+	"bundledWebRuntime": false,
+	"npmClient": "yarn",
+	"webDir": "www",
+	"plugins": {
+		"GoogleAuth": {
+			"scopes": [
+				"profile",
+				"email"
+			],
+			"androidClientId": "440439395388-qvgoklctegmmfnei2d6ue01l01sfor4s.apps.googleusercontent.com",
+			"clientId": "440439395388-cagg8ddq0bppnntvpvfemruqlneqi1tl.apps.googleusercontent.com",
+			"forceCodeForRefreshToken": true
+		}
+	},
+	"server": {
+		"url": "http://192.168.6.5:5000"
+	}
 }

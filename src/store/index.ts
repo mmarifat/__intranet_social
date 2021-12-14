@@ -1,7 +1,7 @@
 import {store} from 'quasar/wrappers'
 import {InjectionKey} from 'vue'
 import {createStore, Store as VuexStore, useStore as vuexUseStore} from 'vuex'
-import {SocialLinkInterface} from 'src/interfaces/social-link.interface';
+import {SocialLinkInterface} from 'src/custom/interfaces/social-link.interface';
 
 /*
  * If not building with SSR mode, you can

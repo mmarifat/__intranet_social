@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "440439395388",
+    "project_id": "intranet-social-f6869",
+    "storage_bucket": "intranet-social-f6869.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:440439395388:android:f21a140654aeb1d0f5df39",
+        "android_client_info": {
+          "package_name": "com.intranet.social"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "440439395388-46fe2gsu6tpng8vj76qppor3sgpiknjv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.intranet.social",
+            "certificate_hash": "1b76493458810047435cb50b9975d6a5eb82063b"
+          }
+        },
+        {
+          "client_id": "440439395388-cagg8ddq0bppnntvpvfemruqlneqi1tl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACCrQ2eOEdh_dIlCdkb0VkAY-nxgfMAew"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "440439395388-cagg8ddq0bppnntvpvfemruqlneqi1tl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

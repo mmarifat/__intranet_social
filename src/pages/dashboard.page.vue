@@ -4,7 +4,7 @@
             Now Running => {{ socialLink.link }}
         </div>
         <div class="q-pa-sm" v-else>
-            Welcome to dashboard
+            Welcome to intranet social
         </div>
     </q-page>
 </template>

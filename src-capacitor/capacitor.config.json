@@ -3,5 +3,16 @@
   "appName": "Intranet Social",
   "bundledWebRuntime": false,
   "npmClient": "yarn",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": [
+        "profile",
+        "email"
+      ],
+      "androidClientId": "440439395388-qvgoklctegmmfnei2d6ue01l01sfor4s.apps.googleusercontent.com",
+      "clientId": "440439395388-cagg8ddq0bppnntvpvfemruqlneqi1tl.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
 }
