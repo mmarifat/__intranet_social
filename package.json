@@ -19,10 +19,9 @@
     },
     "dependencies": {
         "@quasar/extras": "^1.0.0",
-        "axios": "^0.21.1",
         "core-js": "^3.6.5",
         "quasar": "^2.0.0",
-        "vuex": "^4.0.1"
+        "realm-web": "^1.5.1"
     },
     "devDependencies": {
         "@babel/eslint-parser": "^7.13.14",
@@ -34,6 +33,9 @@
         "eslint-config-prettier": "^8.1.0",
         "eslint-plugin-vue": "^7.0.0",
         "execa": "^4.0.0"
+    },
+    "browser": {
+        "crypto": false
     },
     "browserslist": [
         "last 10 Chrome versions",

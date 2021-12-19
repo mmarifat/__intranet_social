@@ -14,8 +14,5 @@
 			"clientId": "440439395388-cagg8ddq0bppnntvpvfemruqlneqi1tl.apps.googleusercontent.com",
 			"forceCodeForRefreshToken": true
 		}
-	},
-	"server": {
-		"url": "http://192.168.6.5:5000"
 	}
 }

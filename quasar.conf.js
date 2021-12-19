@@ -32,7 +32,7 @@ module.exports = configure(function(ctx) {
         // --> boot files are part of "main.js"
         // https://quasar.dev/quasar-cli/boot-files
         boot: [
-            'axios',
+            'router',
         ],
 
         // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -104,7 +104,7 @@ module.exports = configure(function(ctx) {
             // directives: [],
 
             // Quasar plugins
-            plugins: ['Notify'],
+            plugins: ['Notify', 'Loading', 'AppVisibility'],
         },
 
         // animations: 'all', // --- includes all animations

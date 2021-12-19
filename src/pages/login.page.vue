@@ -14,7 +14,7 @@
                     text-color='white'
                     unelevated
                     no-caps
-                    @click="googleSignIn"
+                    @click='googleSignIn'
                 />
             </div>
         </div>
@@ -22,57 +22,77 @@
 </template>
 
 <script lang='ts'>
-import {defineComponent, onMounted} from 'vue';
-import {useRouter} from 'vue-router';
-import {useQuasar} from 'quasar';
-import {GoogleAuth} from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
-import {Storage} from '../../src-capacitor/node_modules/@capacitor/storage';
-import {StorageKeys} from 'src/custom/enums/StorageKeys';
+import { defineComponent, onMounted } from 'vue';
+import { QSpinnerFacebook, useQuasar } from 'quasar';
+import { GoogleAuth } from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
+import { LogInOrRegister, RealmWebClient } from 'src/custom/funtions/RealmWebClient';
 
 export default defineComponent({
     name: 'Login',
     setup() {
-        const router = useRouter();
         const $q = useQuasar();
 
-        onMounted(async () => {
-            const checkGoogleLoggedInStatus = async () => {
-                const {value} = await Storage.get({
-                    key: StorageKeys.GOOGLEUSER,
-                });
-                if (value) {
-                    router.push({name: 'dashboard'})
-                }
+        onMounted(() => {
+            if (!$q.platform.is.capacitor) {
+                GoogleAuth.init();
             }
-            await checkGoogleLoggedInStatus();
-        })
+            const checkGoogleLoggedInStatus = () => {
+                if (RealmWebClient.currentUser?.isLoggedIn) {
+                    window.location.href = '/dashboard';
+                }
+            };
+            checkGoogleLoggedInStatus();
+        });
 
         const googleSignIn = async () => {
-            const response = await GoogleAuth.signIn();
-            if (response) {
-                await Storage.set({
-                    key: StorageKeys.GOOGLEUSER,
-                    value: JSON.stringify(response)
-                });
+            $q.loading.show({
+                message: 'Signing in...........',
+                spinner: QSpinnerFacebook,
+                spinnerSize: 50
+            });
+            try {
+                const response = await GoogleAuth.signIn();
 
-                const givenName = response.givenName;
+                if (response) {
+                    const user = {
+                        ...response,
+                        isGoogleUser: true,
+                        isFacebookUser: false
+                    };
 
-                router.push({name: 'dashboard'})
-                $q.notify({
-                    message: `Successfully logged in as ${givenName}`,
-                    type: 'positive'
-                })
-            } else {
-                $q.notify({
-                    message: 'Login cancelled',
-                    type: 'negative'
-                })
+                    const api = await LogInOrRegister(user.email, user.id);
+
+                    await api?.collection('users').updateOne({
+                        email: user.email,
+                        id: user.id
+                    }, {
+                        ...user,
+                        realmWebID: RealmWebClient.currentUser?.id
+                    }, {
+                        upsert: true
+                    });
+
+                    window.location.href = '/dashboard';
+                    $q.notify({
+                        message: `Successfully logged in as ${response.givenName}`,
+                        type: 'positive'
+                    });
+                    $q.loading.hide();
+                } else {
+                    $q.notify({
+                        message: 'Login cancelled',
+                        type: 'negative'
+                    });
+                }
+            } catch (e) {
+                $q.loading.hide();
             }
-        }
+
+        };
 
         return {
             googleSignIn
-        }
+        };
     }
 });
 </script>

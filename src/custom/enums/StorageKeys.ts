@@ -1,3 +1,4 @@
 export enum StorageKeys {
-    GOOGLEUSER = '__google_user',
+    UPTIME = '__user_up_time',
+    LOGGEDUSER = '__logged_in_user',
 }

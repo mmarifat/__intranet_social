@@ -1,7 +1,7 @@
 <template>
-    <q-item clickable v-for="link in links" :key="link.caption" @click="changeLink(link)">
-        <q-item-section v-if="link.icon" avatar>
-            <q-img :src="link.icon"/>
+    <q-item clickable v-for='link in links' :key='link.caption' @click='changeLink(link)'>
+        <q-item-section v-if='link.icon' avatar>
+            <q-img :src='link.icon' />
         </q-item-section>
 
         <q-item-section>
@@ -13,17 +13,14 @@
     </q-item>
 </template>
 
-<script lang="ts">
-import {defineComponent, ref} from 'vue';
-import {useStore} from 'src/store';
-import {SocialLinkInterface} from 'src/custom/interfaces/social-link.interface';
-import {Browser} from '../../src-capacitor/node_modules/@capacitor/browser';
+<script lang='ts'>
+import { defineComponent, ref } from 'vue';
+import { SocialLinkInterface } from 'src/custom/interfaces/social-link.interface';
+import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
 
 export default defineComponent({
     name: 'SocialLinkComponent',
     setup() {
-        const $store = useStore();
-
         const links = ref<SocialLinkInterface[]>([
             {
                 label: 'Google',
@@ -46,16 +43,15 @@ export default defineComponent({
                 icon: 'logo/facebook.png',
                 mobileOnly: true
             }
-        ])
+        ]);
 
         const changeLink = async (link: SocialLinkInterface) => {
-            $store.commit('SET_SOCIAL_LINK', link)
             await Browser.open({
                 url: link.link
             });
-        }
+        };
 
-        return {links, changeLink}
+        return { links, changeLink };
     }
-})
+});
 </script>
