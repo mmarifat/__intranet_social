@@ -14,7 +14,8 @@
                                 Invite Code: <span class='text-bold'> {{ currentUser?.inviteCode }} </span>
                             </div>
                             <div v-if='currentUser?.invitedPoint?.$numberInt > 0'>
-                                Referral Bonus: <span class='text-bold'> {{ currentUser?.invitedPoint?.$numberInt }} </span> points
+                                Referral Bonus: <span class='text-bold'> {{ currentUser?.invitedPoint?.$numberInt
+                                }} </span> points
                             </div>
                             <div>
                                 Current Reward: <span class='text-bold'> {{ currentReward }} </span> points
@@ -49,6 +50,7 @@ import { useQuasar } from 'quasar';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { Storage } from '../../src-capacitor/node_modules/@capacitor/storage';
 import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
+import { App } from '../../src-capacitor/node_modules/@capacitor/app';
 
 // 5 minutes
 const apiHitInterval = 300;
@@ -75,22 +77,25 @@ export default defineComponent({
 
         Browser.addListener('browserPageLoaded', () => {
             browserMode.value = true;
-        })
+        });
 
         Browser.addListener('browserFinished', () => {
             browserMode.value = false;
-        })
+        });
 
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         setInterval(async () => {
-            if(realmWebApp.currentUser?.isLoggedIn) {
+            const { isActive } = await App.getState();
+            if (realmWebApp.currentUser?.isLoggedIn && isActive) {
                 if ($q.appVisible || (browserMode.value === true)) {
                     if (currentUpTime.value < apiHitInterval) {
                         currentUpTime.value++;
-                        await Storage.set({
-                            key: currentUser.value?.realmID as string,
-                            value: String(currentUpTime.value)
-                        });
+                        if(currentUpTime.value % 60 === 0) {
+                            await Storage.set({
+                                key: currentUser.value?.realmID as string,
+                                value: String(currentUpTime.value)
+                            });
+                        }
                     } else {
                         currentUpTime.value = -1;
                         await Storage.set({
