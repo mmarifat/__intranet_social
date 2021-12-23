@@ -1,11 +1,11 @@
-import { boot } from 'quasar/wrappers';
-import { RealmWebClient } from 'src/custom/funtions/RealmWebClient';
-import { Notify } from 'quasar';
+import {boot} from 'quasar/wrappers';
+import {Notify} from 'quasar';
+import {realmWebApp} from '../custom/funtions/RealmWebClient';
 
-export default boot(({ router }) => {
+export default boot(({router}) => {
     router.beforeEach((to, from, next) => {
         if (to.meta?.protected) {
-            if (RealmWebClient.currentUser?.isLoggedIn) {
+            if (realmWebApp.currentUser?.isLoggedIn) {
                 next();
             } else {
                 router.replace('/');
@@ -16,15 +16,10 @@ export default boot(({ router }) => {
                 });
             }
         } else {
-            if (!RealmWebClient.currentUser?.isLoggedIn) {
+            if (!realmWebApp.currentUser?.isLoggedIn) {
                 next();
             } else {
                 router.replace('/dashboard');
-                /*Notify.create({
-                    message: 'Already logged in',
-                    caption: 'Please log out first!',
-                    type: 'warning'
-                });*/
             }
         }
     });

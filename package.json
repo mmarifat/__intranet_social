@@ -21,7 +21,8 @@
         "@quasar/extras": "^1.0.0",
         "core-js": "^3.6.5",
         "quasar": "^2.0.0",
-        "realm-web": "^1.5.1"
+        "realm-web": "^1.5.1",
+        "referral-codes": "^1.0.2"
     },
     "devDependencies": {
         "@babel/eslint-parser": "^7.13.14",
