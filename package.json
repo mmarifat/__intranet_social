@@ -20,6 +20,7 @@
     "dependencies": {
         "@quasar/extras": "^1.0.0",
         "core-js": "^3.6.5",
+        "mongo-dot-notation": "^2.0.0",
         "quasar": "^2.0.0",
         "realm-web": "^1.5.1",
         "referral-codes": "^1.0.2"

@@ -10,21 +10,26 @@
                             {{ currentUser.email }}
                         </div>
                         <div class='q-py-sm text-grey'>
-                            Current Reward: <span class='text-bold'> {{ currentReward }} </span> points
+                            <div v-if='currentUser?.invitedPoint?.$numberInt > 0'>
+                                Referral Bonus: <span class='text-bold'> {{ currentUser?.invitedPoint?.$numberInt }} </span> points
+                            </div>
+                            <div>
+                                Current Reward: <span class='text-bold'> {{ currentReward }} </span> points
+                            </div>
                         </div>
                     </div>
 
                     <div class='col-12 col-md-auto text-center text-md-right'>
-                        <q-img height='150px' width='150px' class='rounded-borders' :src='currentUser.imageUrl'/>
+                        <q-img height='150px' width='150px' class='rounded-borders' :src='currentUser.imageUrl' />
                     </div>
                 </q-card-section>
 
-                <q-separator/>
+                <q-separator />
 
                 <q-card-actions>
-                    <q-btn flat round icon='event'/>
+                    <q-btn flat round icon='event' />
                     <q-btn flat no-caps class='text-overline'>
-                        Up Time: {{ secondsToTime() }} <br/>
+                        Up Time: {{ secondsToTime() }} <br />
                         <q-tooltip class='bg-light-blue-10' :offset='[10, 10]'>
                             Saved to profile in every 5 minutes
                         </q-tooltip>
@@ -36,13 +41,14 @@
 </template>
 
 <script lang='ts'>
-import {defineComponent, onMounted, ref, watch} from 'vue';
-import {useQuasar} from 'quasar';
-import {realmWebApp} from '../custom/funtions/RealmWebClient';
-import {Storage} from '../../src-capacitor/node_modules/@capacitor/storage';
+import { defineComponent, onMounted, ref, watch } from 'vue';
+import { useQuasar } from 'quasar';
+import { realmWebApp } from '../custom/funtions/RealmWebClient';
+import { Storage } from '../../src-capacitor/node_modules/@capacitor/storage';
 
 // 5 minutes
 const apiHitInterval = 300;
+const increasePoint = 50;
 
 export default defineComponent({
     name: 'DashboardComponent',
@@ -55,19 +61,11 @@ export default defineComponent({
 
         onMounted(async () => {
             currentUser.value = realmWebApp.currentUser?.customData;
-            const {value} = await Storage.get({
+            const { value } = await Storage.get({
                 key: currentUser.value?.realmID as string
             });
+            currentReward.value = currentUser.value?.reward?.$numberInt || 0;
             currentUpTime.value = value ? Number(value) : 0;
-
-            const rewardObj = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('points').findOne({
-                realmID: currentUser.value?.realmID as string
-            }, {
-                projection: {
-                    reward: 1
-                }
-            });
-            currentReward.value = rewardObj.reward;
         });
 
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -93,12 +91,12 @@ export default defineComponent({
             if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
                 if (currentUpTime.value === apiHitInterval) {
                     updatingPointProfile.value = true;
-                    const rewardPoint = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('points').findOneAndUpdate({
-                        userID: currentUser.value?.realmID as string
+                    const rewardPoint = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOneAndUpdate({
+                        realmID: currentUser.value?.realmID as string
                     }, {
                         $inc: {
-                            // change this when necessary
-                            reward: currentUpTime.value
+                            // TODO:: change this when necessary
+                            reward: increasePoint
                         },
                         $set: {
                             realmID: currentUser.value?.realmID as string
@@ -114,7 +112,6 @@ export default defineComponent({
         });
 
         const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(11, 8);
-
 
         return {
             currentUser,

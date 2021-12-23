@@ -18,23 +18,31 @@
                 />
             </div>
         </div>
+        <referral-component v-model='firstTimeLogin' />
     </div>
 </template>
 
 <script lang='ts'>
-import {defineComponent, onMounted} from 'vue';
-import {QSpinnerOval, useQuasar} from 'quasar';
-import {useRouter} from 'vue-router';
+import { defineComponent, onMounted, ref } from 'vue';
+import { QSpinnerOval, useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 import * as Realm from 'realm-web';
 import * as referralCodes from 'referral-codes';
-import {realmWebApp} from 'src/custom/funtions/RealmWebClient';
-import {GoogleAuth} from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
+import { realmWebApp } from 'src/custom/funtions/RealmWebClient';
+import { GoogleAuth } from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
+import ReferralComponent from '../components/referral.component.vue';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const $ = require('mongo-dot-notation');
 
 export default defineComponent({
     name: 'Login',
+    components: { ReferralComponent },
     setup() {
         const $q = useQuasar();
         const $router = useRouter();
+
+        const firstTimeLogin = ref(false);
 
         onMounted(() => {
             if (!$q.platform.is.capacitor) {
@@ -45,7 +53,7 @@ export default defineComponent({
 
         const checkGoogleLoggedInStatus = () => {
             if (realmWebApp.currentUser?.isLoggedIn) {
-                $router.replace({name: 'dashboard'})
+                $router.replace({ name: 'dashboard' });
             }
         };
 
@@ -53,13 +61,13 @@ export default defineComponent({
             $q.loading.show({
                 message: 'Signing in with google...........',
                 spinner: QSpinnerOval,
-                spinnerSize: 80,
-                backgroundColor: 'light-blue-12',
+                spinnerSize: 60,
+                backgroundColor: 'light-blue-12'
             });
             try {
                 const googleCred = await GoogleAuth.signIn();
                 if (!!googleCred) {
-                    const credential = Realm.Credentials.google({idToken: googleCred.authentication.idToken});
+                    const credential = Realm.Credentials.google({ idToken: googleCred.authentication.idToken });
                     await realmWebApp.logIn(credential).then(async response => {
                         const client = response?.mongoClient('mongodb-atlas').db('intranet_social');
 
@@ -67,44 +75,46 @@ export default defineComponent({
                             ...googleCred,
                             realmID: response?.id,
                             sourceID: googleCred.id,
-                            sourceType: 'google',
-                        }
+                            sourceType: 'google'
+                        };
                         delete googleUserPayload?.id;
 
                         const alreadyThere = await client?.collection('users').count({
                             realmID: response?.id,
                             sourceID: googleCred.id
                         });
-
                         if (alreadyThere > 0) {
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                            const flattenPayload = $.flatten({
+                                ...googleUserPayload,
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                                updatedAt: $.$currentDate()
+                            });
                             await client?.collection('users').updateOne({
                                 realmID: response?.id,
-                                sourceID: googleCred.id,
-                            }, {
-                                ...googleUserPayload,
-                            }, {
+                                sourceID: googleCred.id
+                            }, flattenPayload, {
                                 upsert: true
                             });
                         } else {
-                            googleUserPayload.inviteCode = referralCodes.generate({pattern: '###-###-##'})[0].toUpperCase();
-                            await Promise.all([
-                                client?.collection('users').insertOne({...googleUserPayload}),
-                                client?.collection('points').insertOne({
-                                    realmID: response?.id,
-                                    invitedBy: null,
-                                    invitedPoint: 0,
-                                    reward: 0,
-                                })
-                            ]).then(async () => {
+                            googleUserPayload.inviteCode = referralCodes.generate({ pattern: '###-###-##' })[0].toUpperCase();
+                            googleUserPayload.invitedBy = 0;
+                            googleUserPayload.invitedPoint = 0;
+                            googleUserPayload.reward = 0;
+                            googleUserPayload.createdAt = new Date();
+                            client?.collection('users').insertOne({ ...googleUserPayload }).then(async () => {
                                 await realmWebApp.logIn(credential);
-                            })
+                            });
+                            firstTimeLogin.value = true;
                         }
                     }).then(() => {
-                        $router.replace({name: 'dashboard'});
-                        $q.notify({
-                            message: `Successfully logged in as ${googleCred?.givenName}`,
-                            type: 'positive'
-                        });
+                        if (!firstTimeLogin.value) {
+                            $router.replace({ name: 'dashboard' });
+                            $q.notify({
+                                message: `Successfully logged in as ${googleCred?.givenName}`,
+                                type: 'positive'
+                            });
+                        }
                     }).catch(() => {
                         $q.notify({
                             message: 'Something wrong with database-client',
@@ -112,7 +122,7 @@ export default defineComponent({
                         });
                     }).finally(() => {
                         $q.loading.hide();
-                    })
+                    });
                 }
             } catch (e) {
                 $q.loading.hide();
@@ -123,6 +133,7 @@ export default defineComponent({
             }
         };
         return {
+            firstTimeLogin,
             googleSignIn
         };
     }
