@@ -48,6 +48,7 @@ import { defineComponent, onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { Storage } from '../../src-capacitor/node_modules/@capacitor/storage';
+import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
 
 // 5 minutes
 const apiHitInterval = 300;
@@ -61,6 +62,7 @@ export default defineComponent({
         const currentUpTime = ref(0);
         const currentReward = ref(0);
         const updatingPointProfile = ref(false);
+        const browserMode = ref(false);
 
         onMounted(async () => {
             currentUser.value = realmWebApp.currentUser?.customData;
@@ -71,21 +73,31 @@ export default defineComponent({
             currentUpTime.value = value ? Number(value) : 0;
         });
 
+        Browser.addListener('browserPageLoaded', () => {
+            browserMode.value = true;
+        })
+
+        Browser.addListener('browserFinished', () => {
+            browserMode.value = false;
+        })
+
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         setInterval(async () => {
-            if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
-                if (currentUpTime.value < apiHitInterval) {
-                    currentUpTime.value++;
-                    await Storage.set({
-                        key: currentUser.value?.realmID as string,
-                        value: String(currentUpTime.value)
-                    });
-                } else {
-                    currentUpTime.value = -1;
-                    await Storage.set({
-                        key: currentUser.value?.realmID as string,
-                        value: String(0)
-                    });
+            if(realmWebApp.currentUser?.isLoggedIn) {
+                if ($q.appVisible || (browserMode.value === true)) {
+                    if (currentUpTime.value < apiHitInterval) {
+                        currentUpTime.value++;
+                        await Storage.set({
+                            key: currentUser.value?.realmID as string,
+                            value: String(currentUpTime.value)
+                        });
+                    } else {
+                        currentUpTime.value = -1;
+                        await Storage.set({
+                            key: currentUser.value?.realmID as string,
+                            value: String(0)
+                        });
+                    }
                 }
             }
         }, 1000);
