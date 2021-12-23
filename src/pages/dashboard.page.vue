@@ -50,7 +50,6 @@ import { useQuasar } from 'quasar';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { Storage } from '../../src-capacitor/node_modules/@capacitor/storage';
 import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
-import { App } from '../../src-capacitor/node_modules/@capacitor/app';
 
 // 5 minutes
 const apiHitInterval = 300;
@@ -85,8 +84,7 @@ export default defineComponent({
 
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         setInterval(async () => {
-            const { isActive } = await App.getState();
-            if (realmWebApp.currentUser?.isLoggedIn && isActive) {
+            if (realmWebApp.currentUser?.isLoggedIn) {
                 if ($q.appVisible || (browserMode.value === true)) {
                     if (currentUpTime.value < apiHitInterval) {
                         currentUpTime.value++;
@@ -131,7 +129,7 @@ export default defineComponent({
             }
         });
 
-        const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(11, 8);
+        const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(14, 6);
 
         return {
             currentUser,
