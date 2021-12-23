@@ -10,6 +10,9 @@
                             {{ currentUser.email }}
                         </div>
                         <div class='q-py-sm text-grey'>
+                            <div>
+                                Invite Code: <span class='text-bold'> {{ currentUser?.inviteCode }} </span>
+                            </div>
                             <div v-if='currentUser?.invitedPoint?.$numberInt > 0'>
                                 Referral Bonus: <span class='text-bold'> {{ currentUser?.invitedPoint?.$numberInt }} </span> points
                             </div>
