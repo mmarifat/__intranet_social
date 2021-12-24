@@ -17,9 +17,10 @@
                                 Referral Bonus: <span class='text-bold'> {{ currentUser?.invitedPoint?.$numberInt
                                 }} </span> points
                             </div>
-                            <div>
+                            <div v-if='!updatingPointProfile'>
                                 Current Reward: <span class='text-bold'> {{ currentReward }} </span> points
                             </div>
+                            <q-spinner-gears v-else size='15px' />
                         </div>
                     </div>
 
@@ -53,6 +54,7 @@ import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
 
 // 5 minutes
 const apiHitInterval = 300;
+// TODO:: change this when necessary
 const increasePoint = 50;
 
 export default defineComponent({
@@ -63,44 +65,53 @@ export default defineComponent({
         const currentUpTime = ref(0);
         const currentReward = ref(0);
         const updatingPointProfile = ref(false);
-        const browserMode = ref(false);
+        const browserMode = ref(new Date());
 
         onMounted(async () => {
-            currentUser.value = realmWebApp.currentUser?.customData;
+            const realmID = realmWebApp.currentUser?.id as string;
             const { value } = await Storage.get({
-                key: currentUser.value?.realmID as string
+                key: realmID
             });
-            currentReward.value = currentUser.value?.reward?.$numberInt || 0;
+            const rewardObj = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOne({
+                realmID
+            });
+            currentReward.value = rewardObj?.reward || 0;
             currentUpTime.value = value ? Number(value) : 0;
         });
 
         Browser.addListener('browserPageLoaded', () => {
-            browserMode.value = true;
+            browserMode.value = new Date();
         });
 
         Browser.addListener('browserFinished', () => {
-            browserMode.value = false;
+            if (realmWebApp.currentUser?.isLoggedIn) {
+                const newTime = new Date();
+                const seconds = (newTime.getTime() - browserMode.value.getTime()) / 1000;
+                if (seconds) {
+                    const totalInterval = seconds / apiHitInterval;
+                    const totalReferPoint = totalInterval * increasePoint;
+                    updatingReferPoint(totalReferPoint);
+                }
+            }
         });
 
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         setInterval(async () => {
-            if (realmWebApp.currentUser?.isLoggedIn) {
-                if ($q.appVisible || (browserMode.value === true)) {
-                    if (currentUpTime.value < apiHitInterval) {
-                        currentUpTime.value++;
-                        if(currentUpTime.value % 60 === 0) {
-                            await Storage.set({
-                                key: currentUser.value?.realmID as string,
-                                value: String(currentUpTime.value)
-                            });
-                        }
-                    } else {
-                        currentUpTime.value = -1;
+            if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
+                if (currentUpTime.value < apiHitInterval) {
+                    currentUpTime.value++;
+                    if (currentUpTime.value % 5 === 0) {
                         await Storage.set({
                             key: currentUser.value?.realmID as string,
-                            value: String(0)
+                            value: String(currentUpTime.value)
                         });
                     }
+                } else {
+                    currentUpTime.value = -1;
+                    await Storage.set({
+                        key: currentUser.value?.realmID as string,
+                        value: String(0)
+                    });
                 }
             }
         }, 1000);
@@ -108,27 +119,39 @@ export default defineComponent({
         watch(currentUpTime, async () => {
             if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
                 if (currentUpTime.value === apiHitInterval) {
-                    updatingPointProfile.value = true;
-                    const rewardPoint = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOneAndUpdate({
-                        realmID: currentUser.value?.realmID as string
-                    }, {
-                        $inc: {
-                            // TODO:: change this when necessary
-                            reward: increasePoint
-                        },
-                        $set: {
-                            realmID: currentUser.value?.realmID as string
-                        }
-                    }, {
-                        upsert: true,
-                        returnNewDocument: true
-                    });
-                    updatingPointProfile.value = false;
-                    currentReward.value = rewardPoint.reward;
+                    await updatingReferPoint(increasePoint);
+                    await resetTimer();
                 }
             }
         });
 
+        const updatingReferPoint = async (point: number) => {
+            updatingPointProfile.value = true;
+            const rewardPoint = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOneAndUpdate({
+                realmID: currentUser.value?.realmID as string
+            }, {
+                $inc: {
+                    reward: point
+                },
+                $set: {
+                    realmID: currentUser.value?.realmID as string
+                }
+            }, {
+                upsert: true,
+                returnNewDocument: true
+            });
+            updatingPointProfile.value = false;
+            currentReward.value = rewardPoint.reward;
+            await resetTimer();
+        };
+
+        const resetTimer = async () => {
+            currentUpTime.value = -1;
+            await Storage.set({
+                key: currentUser.value?.realmID as string,
+                value: String(0)
+            });
+        };
         const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(14, 6);
 
         return {
