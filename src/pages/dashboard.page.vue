@@ -75,7 +75,8 @@ export default defineComponent({
             const rewardObj = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOne({
                 realmID
             });
-            currentReward.value = rewardObj?.reward || 0;
+            currentUser.value = rewardObj || {};
+            currentReward.value = parseInt((Number(rewardObj?.reward) || 0).toString());
             currentUpTime.value = value ? Number(value) : 0;
         });
 
@@ -131,7 +132,7 @@ export default defineComponent({
                 realmID: currentUser.value?.realmID as string
             }, {
                 $inc: {
-                    reward: point
+                    reward: parseInt((point || 0).toString())
                 },
                 $set: {
                     realmID: currentUser.value?.realmID as string

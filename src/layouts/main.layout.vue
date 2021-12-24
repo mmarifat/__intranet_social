@@ -9,7 +9,7 @@
                     Intranet Social
                 </q-toolbar-title>
 
-                <div>1.0.0</div>
+                <div>1.0</div>
             </q-toolbar>
         </q-header>
 
