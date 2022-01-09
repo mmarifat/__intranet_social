@@ -2,13 +2,15 @@
     <q-page>
         <div class='q-pa-xs'>
             <q-card flat bordered>
-                <q-card-section class='row q-gutter-sm q-py-sm q-px-md text-overline'>
-                    <div class='col order-last'>
-                        <div class='text-overline'>Welcome</div>
+                <q-card-section class='row q-col-gutter-md text-overline'>
+                    <div class='col col-4 row justify-center items-center'>
+                        <q-img class='rounded-borders' :src='currentUser.imageUrl' />
+                    </div>
+                    <div class='col col-8'>
                         <div class='text-h5 q-mt-sm q-mb-xs'>{{ currentUser.name }}</div>
-                        <div class='text-caption text-grey'>
-                            {{ currentUser.email }}
-                        </div>
+                        <!--                        <div class='text-caption text-grey'>
+                                                    {{ currentUser.email }}
+                                                </div>-->
                         <div class='q-py-sm text-grey'>
                             <div>
                                 Invite Code: <span class='text-bold'> {{ currentUser?.inviteCode }} </span>
@@ -23,10 +25,6 @@
                             <q-spinner-gears v-else size='15px' />
                         </div>
                     </div>
-
-                    <div class='col-12 col-md-auto text-center text-md-right'>
-                        <q-img height='150px' width='150px' class='rounded-borders' :src='currentUser.imageUrl' />
-                    </div>
                 </q-card-section>
 
                 <q-separator />
@@ -40,6 +38,24 @@
                         </q-tooltip>
                     </q-btn>
                 </q-card-actions>
+
+                <q-card-section class='q-mt-sm'>
+                    <div class='row justify-start q-col-gutter-lg'>
+                        <q-item class='col col-4' clickable v-for='link in links' :key='link.caption'
+                                @click='changeLink(link)'>
+                            <q-item-section v-if='link.icon' avatar>
+                                <q-img :src='link.icon' />
+                            </q-item-section>
+
+                            <q-item-section>
+                                <q-item-label>{{ link.label }}</q-item-label>
+                                <q-item-label caption>
+                                    {{ link.caption }}
+                                </q-item-label>
+                            </q-item-section>
+                        </q-item>
+                    </div>
+                </q-card-section>
             </q-card>
         </div>
     </q-page>
@@ -51,6 +67,8 @@ import { useQuasar } from 'quasar';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { Storage } from '../../src-capacitor/node_modules/@capacitor/storage';
 import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
+import { SocialLinkInterface } from '../custom/interfaces/social-link.interface';
+import SocialLinks from '../custom/constants/social.links';
 
 // 5 minutes
 const apiHitInterval = 300;
@@ -153,14 +171,23 @@ export default defineComponent({
                 value: String(0)
             });
         };
-        const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(14, 6);
+        const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(14, 5);
+
+        const links = ref<SocialLinkInterface[]>(SocialLinks);
+        const changeLink = async (link: SocialLinkInterface) => {
+            await Browser.open({
+                url: link.link
+            });
+        };
 
         return {
             currentUser,
             currentUpTime,
             currentReward,
             updatingPointProfile,
-            secondsToTime
+            secondsToTime,
+            links,
+            changeLink
         };
     }
 });

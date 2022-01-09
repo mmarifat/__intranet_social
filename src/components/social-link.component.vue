@@ -17,33 +17,12 @@
 import { defineComponent, ref } from 'vue';
 import { SocialLinkInterface } from 'src/custom/interfaces/social-link.interface';
 import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
+import SocialLinks from '../custom/constants/social.links';
 
 export default defineComponent({
     name: 'SocialLinkComponent',
     setup() {
-        const links = ref<SocialLinkInterface[]>([
-            {
-                label: 'Google',
-                link: 'https://www.google.com',
-                caption: '@google',
-                icon: 'logo/google.png',
-                mobileOnly: true
-            },
-            {
-                label: 'Youtube',
-                link: 'https://m.youtube.com',
-                caption: '@youtube',
-                icon: 'logo/youtube.png',
-                mobileOnly: true
-            },
-            {
-                label: 'Facebook',
-                link: 'https://m.facebook.com',
-                caption: '@facebook',
-                icon: 'logo/facebook.png',
-                mobileOnly: true
-            }
-        ]);
+        const links = ref<SocialLinkInterface[]>(SocialLinks);
 
         const changeLink = async (link: SocialLinkInterface) => {
             await Browser.open({
