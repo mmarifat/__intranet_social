@@ -31,6 +31,7 @@ import * as referralCodes from 'referral-codes';
 import { realmWebApp } from 'src/custom/funtions/RealmWebClient';
 import { GoogleAuth } from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
 import ReferralComponent from '../components/referral.component.vue';
+import { useEmitter } from '../boot/mitt';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const $ = require('mongo-dot-notation');
@@ -41,6 +42,7 @@ export default defineComponent({
     setup() {
         const $q = useQuasar();
         const $router = useRouter();
+        const emitter = useEmitter();
 
         const firstTimeLogin = ref(false);
 
@@ -79,37 +81,43 @@ export default defineComponent({
                         };
                         delete googleUserPayload?.id;
 
-                        const alreadyThere = await client?.collection('users').count({
+                        const alreadyThere = await client?.collection('users').findOne({
                             realmID: response?.id,
                             sourceID: googleCred.id
                         });
-                        if (alreadyThere > 0) {
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                            const flattenPayload = $.flatten({
-                                ...googleUserPayload,
+                        if (!!alreadyThere) {
+                            if (alreadyThere.invitedBy === null) {
+                                firstTimeLogin.value = true;
+                                emitter.emit('firstTimeLogin', credential);
+                            } else {
                                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                                updatedAt: $.$currentDate()
-                            });
-                            await client?.collection('users').updateOne({
-                                realmID: response?.id,
-                                sourceID: googleCred.id
-                            }, flattenPayload, {
-                                upsert: true
-                            });
+                                const flattenPayload = $.flatten({
+                                    ...googleUserPayload,
+                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                                    updatedAt: $.$currentDate()
+                                });
+                                await client?.collection('users').updateOne({
+                                    realmID: response?.id,
+                                    sourceID: googleCred.id
+                                }, flattenPayload, {
+                                    upsert: true
+                                });
+                            }
                         } else {
                             googleUserPayload.inviteCode = referralCodes.generate({ pattern: '###-###-##' })[0].toUpperCase();
-                            googleUserPayload.invitedBy = 0;
-                            googleUserPayload.invitedPoint = 0;
-                            googleUserPayload.reward = 0;
+                            googleUserPayload.invitedBy = null;
+                            googleUserPayload.invitedPoint = 0.0;
+                            googleUserPayload.reward = 0.0;
+                            googleUserPayload.rewardCounter = 0;
                             googleUserPayload.createdAt = new Date();
-                            client?.collection('users').insertOne({ ...googleUserPayload }).then(async () => {
-                                await realmWebApp.logIn(credential);
-                            });
+                            client?.collection('users').insertOne({ ...googleUserPayload });
                             firstTimeLogin.value = true;
+                            emitter.emit('firstTimeLogin', credential);
                         }
-                    }).then(() => {
+                    }).then(async () => {
+                        await realmWebApp.logIn(credential);
                         if (!firstTimeLogin.value) {
-                            $router.replace({ name: 'dashboard' });
+                            $router.replace({ name: 'dashboard' }).catch(e => e);
                             $q.notify({
                                 message: `Successfully logged in as ${googleCred?.givenName}`,
                                 type: 'positive'

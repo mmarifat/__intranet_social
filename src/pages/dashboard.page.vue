@@ -1,63 +1,49 @@
 <template>
     <q-page>
-        <div class='q-pa-xs'>
-            <q-card flat bordered>
-                <q-card-section class='row q-col-gutter-md text-overline'>
-                    <div class='col col-4 row justify-center items-center'>
-                        <q-img class='rounded-borders' :src='currentUser.imageUrl' />
-                    </div>
-                    <div class='col col-8'>
-                        <div class='text-h5 q-mt-sm q-mb-xs'>{{ currentUser.name }}</div>
-                        <!--                        <div class='text-caption text-grey'>
-                                                    {{ currentUser.email }}
-                                                </div>-->
-                        <div class='q-py-sm text-grey'>
-                            <div>
-                                Invite Code: <span class='text-bold'> {{ currentUser?.inviteCode }} </span>
-                            </div>
-                            <div v-if='currentUser?.invitedPoint?.$numberInt > 0'>
-                                Referral Bonus: <span class='text-bold'> {{ currentUser?.invitedPoint?.$numberInt
-                                }} </span> points
-                            </div>
-                            <div v-if='!updatingPointProfile'>
-                                Current Reward: <span class='text-bold'> {{ currentReward }} </span> points
-                            </div>
-                            <q-spinner-gears v-else size='15px' />
+        <q-card flat bordered>
+            <q-card-section class='row q-col-gutter-md text-overline q-pa-sm'>
+                <div class='col col-4 row justify-start items-center'>
+                    <q-img v-if='$q.platform.is.capacitor' class='rounded-borders' :src='currentUser.imageUrl' />
+                    <q-img v-else width='150px' height='150px' class='rounded-borders' :src='currentUser.imageUrl' />
+                </div>
+                <div class='col col-8 text-right'>
+                    <div class='text-h5 q-mt-sm q-mb-xs'>{{ currentUser.name }}</div>
+                    <!--                        <div class='text-caption text-grey'>
+                                                {{ currentUser.email }}
+                                            </div>-->
+                    <div class='q-py-sm text-grey'>
+                        <div>
+                            Invite Code: <span class='text-bold'> {{ currentUser?.inviteCode }} </span>
                         </div>
+                        <div v-if='!updatingPointProfile'>
+                            Current Reward: <span class='text-bold'> {{ currentReward }} </span> points
+                        </div>
+                        <q-spinner-gears v-else size='15px' />
                     </div>
-                </q-card-section>
+                </div>
+            </q-card-section>
 
-                <q-separator />
+            <q-separator />
 
-                <q-card-actions>
-                    <q-btn flat round icon='event' />
-                    <q-btn flat no-caps class='text-overline'>
-                        Up Time: {{ secondsToTime() }} <br />
-                        <q-tooltip class='bg-light-blue-10' :offset='[10, 10]'>
-                            Saved to profile in every 5 minutes
-                        </q-tooltip>
-                    </q-btn>
-                </q-card-actions>
+            <q-card-section class='q-mt-sm q-pa-sm'>
+                <div class='row justify-evenly q-col-gutter-lg'>
+                    <q-item class='col col-4' clickable dense v-for='link in links' :key='link.caption'
+                            @click='changeLink(link)'>
+                        <q-item-section v-if='link.icon' avatar>
+                            <q-img :src='link.icon' />
+                        </q-item-section>
 
-                <q-card-section class='q-mt-sm'>
-                    <div class='row justify-start q-col-gutter-lg'>
-                        <q-item class='col col-4' clickable v-for='link in links' :key='link.caption'
-                                @click='changeLink(link)'>
-                            <q-item-section v-if='link.icon' avatar>
-                                <q-img :src='link.icon' />
-                            </q-item-section>
-
-                            <q-item-section>
-                                <q-item-label>{{ link.label }}</q-item-label>
-                                <q-item-label caption>
-                                    {{ link.caption }}
-                                </q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </div>
-                </q-card-section>
-            </q-card>
-        </div>
+                        <q-item-section>
+                            <q-item-label>{{ link.label }}</q-item-label>
+                            <q-item-label caption>
+                                {{ link.caption }}
+                            </q-item-label>
+                        </q-item-section>
+                    </q-item>
+                </div>
+            </q-card-section>
+        </q-card>
+        <user-post />
     </q-page>
 </template>
 
@@ -69,17 +55,17 @@ import { Storage } from '../../src-capacitor/node_modules/@capacitor/storage';
 import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
 import { SocialLinkInterface } from '../custom/interfaces/social-link.interface';
 import SocialLinks from '../custom/constants/social.links';
-
-// 5 minutes
-const apiHitInterval = 300;
-// TODO:: change this when necessary
-const increasePoint = 50;
+import { useEmitter } from '../boot/mitt';
+import UserPost from '../components/user-post.component.vue';
 
 export default defineComponent({
     name: 'DashboardComponent',
+    components: { UserPost },
     setup() {
         const $q = useQuasar();
+        const emitter = useEmitter();
         const currentUser = ref({} as any);
+        const bonusChart = ref({} as any);
         const currentUpTime = ref(0);
         const currentReward = ref(0);
         const updatingPointProfile = ref(false);
@@ -90,11 +76,12 @@ export default defineComponent({
             const { value } = await Storage.get({
                 key: realmID
             });
+            bonusChart.value = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('bonus-chart').findOne({});
             const rewardObj = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOne({
                 realmID
             });
             currentUser.value = rewardObj || {};
-            currentReward.value = parseInt((Number(rewardObj?.reward) || 0).toString());
+            currentReward.value = parseInt((Number(rewardObj?.reward) || 0).toString()) + Number(rewardObj?.invitedPoint);
             currentUpTime.value = value ? Number(value) : 0;
         });
 
@@ -107,9 +94,9 @@ export default defineComponent({
                 const newTime = new Date();
                 const seconds = (newTime.getTime() - browserMode.value.getTime()) / 1000;
                 if (seconds) {
-                    const totalInterval = seconds / apiHitInterval;
-                    const totalReferPoint = totalInterval * increasePoint;
-                    updatingReferPoint(totalReferPoint);
+                    const totalInterval = seconds / Number(bonusChart.value?.referInterval);
+                    const pointToInc = calculateIncreaseValue(totalInterval);
+                    updatingReferPoint(pointToInc);
                 }
             }
         });
@@ -117,7 +104,7 @@ export default defineComponent({
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         setInterval(async () => {
             if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
-                if (currentUpTime.value < apiHitInterval) {
+                if (currentUpTime.value < Number(bonusChart.value?.referInterval)) {
                     currentUpTime.value++;
                     if (currentUpTime.value % 5 === 0) {
                         await Storage.set({
@@ -137,12 +124,24 @@ export default defineComponent({
 
         watch(currentUpTime, async () => {
             if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
-                if (currentUpTime.value === apiHitInterval) {
-                    await updatingReferPoint(increasePoint);
+                if (currentUpTime.value === Number(bonusChart.value?.referInterval)) {
+                    const pointToInc = calculateIncreaseValue();
+                    await updatingReferPoint(pointToInc);
                     await resetTimer();
                 }
             }
+            emitter.emit('up-time', secondsToTime());
         });
+        const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(14, 5);
+
+        const calculateIncreaseValue = (appendCounter = 0) => {
+            const increaseInterval = appendCounter + parseInt(currentUser.value?.rewardCounter);
+            let increasePoint = Number(bonusChart.value?.referIncrease);
+            for (let i = 0; i < increaseInterval; i++) {
+                increasePoint = Number(increasePoint / Number(bonusChart.value?.referReducer));
+            }
+            return increasePoint;
+        };
 
         const updatingReferPoint = async (point: number) => {
             updatingPointProfile.value = true;
@@ -150,7 +149,8 @@ export default defineComponent({
                 realmID: currentUser.value?.realmID as string
             }, {
                 $inc: {
-                    reward: parseInt((point || 0).toString())
+                    reward: Number((point || 0).toString()),
+                    rewardCounter: 1
                 },
                 $set: {
                     realmID: currentUser.value?.realmID as string
@@ -160,7 +160,8 @@ export default defineComponent({
                 returnNewDocument: true
             });
             updatingPointProfile.value = false;
-            currentReward.value = rewardPoint.reward;
+            currentUser.value = rewardPoint;
+            currentReward.value = parseInt((Number(rewardPoint?.reward) + Number(rewardPoint?.invitedPoint)).toString());
             await resetTimer();
         };
 
@@ -171,7 +172,6 @@ export default defineComponent({
                 value: String(0)
             });
         };
-        const secondsToTime = () => new Date(Number(currentUpTime.value) * 1000).toISOString().substr(14, 5);
 
         const links = ref<SocialLinkInterface[]>(SocialLinks);
         const changeLink = async (link: SocialLinkInterface) => {
@@ -185,7 +185,6 @@ export default defineComponent({
             currentUpTime,
             currentReward,
             updatingPointProfile,
-            secondsToTime,
             links,
             changeLink
         };

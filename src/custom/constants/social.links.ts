@@ -15,13 +15,13 @@ const SocialLinks: Array<SocialLinkInterface> = [
         icon: 'logo/facebook.png',
         mobileOnly: true
     },
-    {
+   /* {
         label: 'Google',
         link: 'https://www.google.com',
         caption: '@google',
         icon: 'logo/google.png',
         mobileOnly: true
-    }
+    }*/
 ];
 
 export default SocialLinks;

@@ -3,13 +3,18 @@
         <q-header elevated class='bg-light-blue-10'>
             <q-toolbar>
                 <q-btn flat dense round icon='menu' aria-label='Menu'
-                       @click='leftDrawerOpen = !leftDrawerOpen'/>
+                       @click='leftDrawerOpen = !leftDrawerOpen' />
 
                 <q-toolbar-title>
                     Intranet Social
                 </q-toolbar-title>
 
-                <div>1.0</div>
+                <div class='cursor-pointer'>
+                    {{ upTime }} <br />
+                    <q-tooltip class='bg-light-blue-10' :offset='[10, 10]'>
+                        Saved to profile in every 5 minutes
+                    </q-tooltip>
+                </div>
             </q-toolbar>
         </q-header>
 
@@ -20,7 +25,7 @@
                 </q-item-label>
 
                 <q-item-section>
-                    <social-link-component/>
+                    <social-link-component />
                 </q-item-section>
 
                 <q-footer elevated class='row justify-between bg-transparent'>
@@ -30,7 +35,7 @@
                         no-wrap
                         icon='power_off'
                         class='full-width'
-                        @click='confirmSignOut = true'/>
+                        @click='confirmSignOut = true' />
                 </q-footer>
             </q-list>
         </q-drawer>
@@ -38,45 +43,51 @@
         <q-dialog v-model='confirmSignOut' persistent>
             <q-card>
                 <q-card-section class='row items-center'>
-                    <q-avatar rounded size='lg' icon='power_off' color='primary' text-color='white'/>
+                    <q-avatar rounded size='lg' icon='power_off' color='primary' text-color='white' />
                     <span class='q-ml-sm'>Are you sure to sign out?</span>
                 </q-card-section>
 
                 <q-card-actions align='right'>
-                    <q-btn flat label='No' color='primary' text-color='negative' v-close-popup/>
-                    <q-btn flat label='Yes' color='primary' @click='signOut'/>
+                    <q-btn flat label='No' color='primary' text-color='negative' v-close-popup />
+                    <q-btn flat label='Yes' color='primary' @click='signOut' />
                 </q-card-actions>
             </q-card>
         </q-dialog>
 
         <q-page-container>
-            <router-view/>
+            <router-view />
         </q-page-container>
     </q-layout>
 </template>
 
 <script lang='ts'>
-import {defineComponent, onMounted, ref} from 'vue';
-import {QSpinnerDots, useQuasar} from 'quasar';
-import {useRouter} from 'vue-router';
-import {realmWebApp} from '../custom/funtions/RealmWebClient';
+import { defineComponent, onMounted, ref } from 'vue';
+import { QSpinnerDots, useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
+import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import SocialLinkComponent from 'components/social-link.component.vue';
-import {GoogleAuth} from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
+import { GoogleAuth } from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
+import { useEmitter } from '../boot/mitt';
 
 export default defineComponent({
     name: 'MainLayout',
-    components: {SocialLinkComponent},
+    components: { SocialLinkComponent },
     setup() {
         const router = useRouter();
         const $q = useQuasar();
+        const emitter: any = useEmitter();
 
         const leftDrawerOpen = ref(false);
         const confirmSignOut = ref(false);
+        const upTime = ref('00:00');
 
         onMounted(() => {
             if (!$q.platform.is.capacitor) {
                 GoogleAuth.init();
             }
+            emitter.on('up-time', (time: string) => {
+                upTime.value = time;
+            });
         });
 
         const signOut = async () => {
@@ -93,13 +104,13 @@ export default defineComponent({
                 confirmSignOut.value = false;
                 $q.loading.hide();
 
-                await router.push({name: 'login'});
+                await router.push({ name: 'login' });
                 $q.notify({
                     message: 'Successfully logged out',
                     type: 'positive'
                 });
             } catch (e) {
-                await router.push({name: 'login'});
+                await router.push({ name: 'login' });
                 confirmSignOut.value = false;
                 $q.loading.hide();
                 $q.notify({
@@ -111,6 +122,7 @@ export default defineComponent({
         return {
             leftDrawerOpen,
             confirmSignOut,
+            upTime,
             signOut
         };
     }

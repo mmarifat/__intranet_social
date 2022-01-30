@@ -16,9 +16,6 @@
                 <q-btn dense flat icon='crop_square' @click='maximizedToggle = true' :disable='maximizedToggle'>
                     <q-tooltip v-if='!maximizedToggle' class='bg-white text-primary'>Maximize</q-tooltip>
                 </q-btn>
-                <q-btn dense flat icon='close' @click='submitSkip'>
-                    <q-tooltip class='bg-white text-primary'>Close</q-tooltip>
-                </q-btn>
             </q-bar>
 
             <q-card-section class='text-center text-overline'>
@@ -34,10 +31,6 @@
                         </template>
                     </q-input>
                     <div class='row q-col-gutter-md justify-center q-mt-md'>
-                        <div class='pr-4'>
-                            <q-btn color='red' text-color='white' icon-right='fa fa-fast-forward' label='Skip'
-                                   @click='submitSkip' />
-                        </div>
                         <div>
                             <q-btn color='info' text-color='white' icon-right='send' label='Use' type='submit'
                                    :loading='codeLoading' />
@@ -50,14 +43,11 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
-
-
-// TODO:: change when necessary
-const referralBonus = 1000;
+import { useEmitter } from '../boot/mitt';
 
 export default defineComponent({
     name: 'Referral',
@@ -81,9 +71,18 @@ export default defineComponent({
     setup() {
         const $q = useQuasar();
         const $router = useRouter();
+        const emitter = useEmitter();
         const maximizedToggle = ref(false);
         const refCode = ref('');
+        const refValue = ref(0);
         const codeLoading = ref(false);
+        const loginCredential = ref({});
+
+        onMounted(() => {
+            emitter.on('firstTimeLogin', (credential: any) => {
+                loginCredential.value = credential;
+            });
+        });
 
         const submitSkip = () => {
             const user: any = realmWebApp.currentUser?.customData;
@@ -102,27 +101,43 @@ export default defineComponent({
                     realmID: { $ne: realmWebApp.currentUser?.id }
                 });
                 if (!!result) {
-                    await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').updateOne({
-                        realmID: realmWebApp.currentUser?.id
-                    }, {
-                        $set: {
-                            invitedBy: result?._id,
-                            invitedPoint: referralBonus
-                        }
+                    const bonusChart = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('bonus-chart').findOne({});
+                    refValue.value = bonusChart?.referralBonus;
+                    Promise.all([
+                        await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').updateOne({
+                            _id: result?._id
+                        }, {
+                            $set: {
+                                reward: Number(result?.reward) + Number(bonusChart.referreBonus)
+                            }
+                        }),
+                        await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').updateOne({
+                            realmID: realmWebApp.currentUser?.id
+                        }, {
+                            $set: {
+                                invitedBy: result?._id,
+                                invitedPoint: bonusChart.referralBonus
+                            }
+                        })
+                    ]).then(async () => {
+                        await realmWebApp.logIn(loginCredential.value as any);
+                    }).then(() => {
+                        $q.notify({
+                            message: 'Congratulations',
+                            caption: `You have received ${refValue.value} points as referral bonus`,
+                            type: 'info'
+                        });
+                        submitSkip();
+                    }).finally(() => {
+                        codeLoading.value = false;
                     });
-                    $q.notify({
-                        message: 'Congratulations',
-                        caption: `You have received ${referralBonus} points as referral bonus`,
-                        type: 'info'
-                    });
-                    submitSkip();
                 } else {
+                    codeLoading.value = false;
                     $q.notify({
                         message: 'Invalid referral code',
                         type: 'warning'
                     });
                 }
-                codeLoading.value = false;
             }
         };
 
@@ -130,7 +145,6 @@ export default defineComponent({
             maximizedToggle,
             refCode,
             codeLoading,
-            submitSkip,
             submitReferralCode
         };
     }

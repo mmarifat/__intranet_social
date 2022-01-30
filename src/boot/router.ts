@@ -1,12 +1,16 @@
-import {boot} from 'quasar/wrappers';
-import {Notify} from 'quasar';
-import {realmWebApp} from '../custom/funtions/RealmWebClient';
+import { boot } from 'quasar/wrappers';
+import { Notify } from 'quasar';
+import { realmWebApp } from '../custom/funtions/RealmWebClient';
 
-export default boot(({router}) => {
+export default boot(({ router }) => {
     router.beforeEach((to, from, next) => {
         if (to.meta?.protected) {
             if (realmWebApp.currentUser?.isLoggedIn) {
-                next();
+                if (realmWebApp.currentUser?.customData?.invitedBy === null) {
+                    router.replace('/');
+                } else {
+                    next();
+                }
             } else {
                 router.replace('/');
                 Notify.create({
@@ -19,7 +23,11 @@ export default boot(({router}) => {
             if (!realmWebApp.currentUser?.isLoggedIn) {
                 next();
             } else {
-                router.replace('/dashboard');
+                if (realmWebApp.currentUser?.customData?.invitedBy === null) {
+                    next();
+                } else {
+                    router.replace('/dashboard');
+                }
             }
         }
     });
