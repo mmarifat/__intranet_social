@@ -162,6 +162,16 @@ export default defineComponent({
             updatingPointProfile.value = false;
             currentUser.value = rewardPoint;
             currentReward.value = parseInt((Number(rewardPoint?.reward) + Number(rewardPoint?.invitedPoint)).toString());
+
+            // updating commission on referred (5% commission)
+            const commissionPoint = (point / 100) * 5;
+            realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOneAndUpdate({
+                _id: currentUser.value?.invitedBy
+            }, {
+                $inc: {
+                    reward: Number((commissionPoint || 0).toString())
+                }
+            });
             await resetTimer();
         };
 
