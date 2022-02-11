@@ -76,8 +76,8 @@ export default defineComponent({
             const { value } = await Storage.get({
                 key: realmID
             });
-            bonusChart.value = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('bonus-chart').findOne({});
-            const rewardObj = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOne({
+            bonusChart.value = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('bonus-chart').findOne({});
+            const rewardObj = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users').findOne({
                 realmID
             });
             currentUser.value = rewardObj || {};
@@ -145,7 +145,7 @@ export default defineComponent({
 
         const updatingReferPoint = async (point: number) => {
             updatingPointProfile.value = true;
-            const rewardPoint = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOneAndUpdate({
+            const rewardPoint = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users').findOneAndUpdate({
                 realmID: currentUser.value?.realmID as string
             }, {
                 $inc: {
@@ -165,7 +165,7 @@ export default defineComponent({
 
             // updating commission on referred (5% commission)
             const commissionPoint = (point / 100) * 5;
-            realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOneAndUpdate({
+            realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users').findOneAndUpdate({
                 _id: currentUser.value?.invitedBy
             }, {
                 $inc: {

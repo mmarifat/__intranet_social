@@ -71,7 +71,7 @@ export default defineComponent({
                 if (!!googleCred) {
                     const credential = Realm.Credentials.google({ idToken: googleCred.authentication.idToken });
                     await realmWebApp.logIn(credential).then(async response => {
-                        const client = response?.mongoClient('mongodb-atlas').db('intranet_social');
+                        const client = response?.mongoClient('mongodb-atlas').db('intranet-social');
 
                         const googleUserPayload: any = {
                             ...googleCred,

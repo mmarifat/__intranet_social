@@ -96,22 +96,22 @@ export default defineComponent({
         const submitReferralCode = async () => {
             if (realmWebApp.currentUser?.isLoggedIn) {
                 codeLoading.value = true;
-                const result = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').findOne({
+                const result = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users').findOne({
                     inviteCode: refCode.value,
                     realmID: { $ne: realmWebApp.currentUser?.id }
                 });
                 if (!!result) {
-                    const bonusChart = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('bonus-chart').findOne({});
+                    const bonusChart = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('bonus-chart').findOne({});
                     refValue.value = bonusChart?.referralBonus;
                     Promise.all([
-                        await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').updateOne({
+                        await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users').updateOne({
                             _id: result?._id
                         }, {
                             $set: {
                                 reward: Number(result?.reward) + Number(bonusChart.referreBonus)
                             }
                         }),
-                        await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet_social')?.collection('users').updateOne({
+                        await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users').updateOne({
                             realmID: realmWebApp.currentUser?.id
                         }, {
                             $set: {
