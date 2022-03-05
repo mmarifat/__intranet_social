@@ -109,6 +109,9 @@ export default defineComponent({
                             googleUserPayload.invitedPoint = 0.0;
                             googleUserPayload.reward = 0.0;
                             googleUserPayload.rewardCounter = 0;
+                            googleUserPayload.verified = false;
+                            googleUserPayload.nid = '';
+                            googleUserPayload.userType = 'user';
                             googleUserPayload.createdAt = new Date();
                             client?.collection('users').insertOne({ ...googleUserPayload });
                             firstTimeLogin.value = true;

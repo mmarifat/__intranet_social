@@ -22,6 +22,34 @@ const routes: RouteRecordRaw[] = [
                     title: 'Dashboard',
                     protected: true
                 }
+            },
+            {
+                path: '/profile',
+                name: 'profile',
+                component: () => import('pages/profile.page.vue'),
+                meta: {
+                    title: 'Profile',
+                    protected: true
+                }
+            },
+            {
+                path: '/point-withdraw',
+                name: 'pointWithdraw',
+                component: () => import('pages/point-withdraw.page.vue'),
+                meta: {
+                    title: 'Point Withdraw',
+                    protected: true
+                }
+            },
+            {
+                path: '/users',
+                name: 'users',
+                component: () => import('pages/users.page.vue'),
+                meta: {
+                    title: 'Users',
+                    protected: true,
+                    adminOnly: true
+                }
             }
         ]
     },

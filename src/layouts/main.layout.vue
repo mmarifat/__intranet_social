@@ -9,7 +9,7 @@
                     Intranet Social
                 </q-toolbar-title>
 
-                <div class='cursor-pointer'>
+                <div class='cursor-pointer' v-if='$route.name === "dashboard"'>
                     {{ upTime }} <br />
                     <q-tooltip class='bg-light-blue-10' :offset='[10, 10]'>
                         Saved to profile in every 5 minutes
@@ -18,26 +18,18 @@
             </q-toolbar>
         </q-header>
 
-        <q-drawer v-model='leftDrawerOpen' show-if-above bordered>
-            <q-list>
-                <q-item-label header>
-                    Intranet Social Links
-                </q-item-label>
+        <q-drawer v-model='leftDrawerOpen' bordered behavior='mobile'>
+            <menu-component />
 
-                <q-item-section>
-                    <social-link-component />
-                </q-item-section>
-
-                <q-footer elevated class='row justify-between bg-transparent'>
-                    <q-btn
-                        label='Sign Out'
-                        color='blue'
-                        no-wrap
-                        icon='power_off'
-                        class='full-width'
-                        @click='confirmSignOut = true' />
-                </q-footer>
-            </q-list>
+            <q-footer elevated class='row justify-between bg-transparent'>
+                <q-btn
+                    label='Sign Out'
+                    color='blue'
+                    no-wrap
+                    icon='power_off'
+                    class='full-width'
+                    @click='confirmSignOut = true' />
+            </q-footer>
         </q-drawer>
 
         <q-dialog v-model='confirmSignOut' persistent>
@@ -65,13 +57,13 @@ import { defineComponent, onMounted, ref } from 'vue';
 import { QSpinnerDots, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
-import SocialLinkComponent from 'components/social-link.component.vue';
 import { GoogleAuth } from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
 import { useEmitter } from '../boot/mitt';
+import MenuComponent from '../components/menu.component.vue';
 
 export default defineComponent({
     name: 'MainLayout',
-    components: { SocialLinkComponent },
+    components: { MenuComponent },
     setup() {
         const router = useRouter();
         const $q = useQuasar();
@@ -87,6 +79,9 @@ export default defineComponent({
             }
             emitter.on('up-time', (time: string) => {
                 upTime.value = time;
+            });
+            emitter.on('sign-out', async () => {
+                await signOut();
             });
         });
 

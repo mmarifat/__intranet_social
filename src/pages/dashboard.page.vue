@@ -13,7 +13,7 @@
                                             </div>-->
                     <div class='q-py-sm text-grey'>
                         <div>
-                            Invite Code: <span class='text-bold'> {{ currentUser?.inviteCode }} </span>
+                            Invite Code: <span class='text-bold'> {{ currentUser.inviteCode }} </span>
                         </div>
                         <div v-if='!updatingPointProfile'>
                             Current Reward: <span class='text-bold'> {{ currentReward }} </span> points

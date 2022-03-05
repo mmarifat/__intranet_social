@@ -9,7 +9,11 @@ export default boot(({ router }) => {
                 if (realmWebApp.currentUser?.customData?.invitedBy === null) {
                     router.replace('/');
                 } else {
-                    next();
+                    if (to.meta?.onlyAdmin === true && realmWebApp.currentUser?.customData?.userType !== 'admin') {
+                        router.replace('/dashboard');
+                    } else {
+                        next();
+                    }
                 }
             } else {
                 router.replace('/');
