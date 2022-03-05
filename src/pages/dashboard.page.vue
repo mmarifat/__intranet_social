@@ -1,7 +1,7 @@
 <template>
     <q-page>
         <q-card flat bordered>
-            <q-card-section class='row q-col-gutter-md text-overline q-pa-sm'>
+            <q-card-section class='row q-col-gutter-md text-overline q-pa-sm' ref='dashboardSection'>
                 <div class='col col-4 row justify-start items-center'>
                     <q-img v-if='$q.platform.is.capacitor' class='rounded-borders' :src='currentUser.imageUrl' />
                     <q-img v-else width='150px' height='150px' class='rounded-borders' :src='currentUser.imageUrl' />
@@ -43,7 +43,16 @@
                 </div>
             </q-card-section>
         </q-card>
+
+        <add-user-post />
         <user-post />
+
+        <q-page-sticky position='bottom-right'>
+            <q-tooltip>
+                Click to add new post
+            </q-tooltip>
+            <q-btn round size='12px' icon='add' color='light-blue-10' @click='openAddUserPostDialog' />
+        </q-page-sticky>
     </q-page>
 </template>
 
@@ -57,10 +66,11 @@ import { SocialLinkInterface } from '../custom/interfaces/social-link.interface'
 import SocialLinks from '../custom/constants/social.links';
 import { useEmitter } from '../boot/mitt';
 import UserPost from '../components/user-post.component.vue';
+import AddUserPost from '../components/add-user-post.component.vue';
 
 export default defineComponent({
     name: 'DashboardComponent',
-    components: { UserPost },
+    components: { AddUserPost, UserPost },
     setup() {
         const $q = useQuasar();
         const emitter = useEmitter();
@@ -190,13 +200,18 @@ export default defineComponent({
             });
         };
 
+        const openAddUserPostDialog = () => {
+            emitter.emit('open-add-user-post-dialog', true);
+        };
+
         return {
             currentUser,
             currentUpTime,
             currentReward,
             updatingPointProfile,
             links,
-            changeLink
+            changeLink,
+            openAddUserPostDialog
         };
     }
 });
