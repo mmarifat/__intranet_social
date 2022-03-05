@@ -24,7 +24,7 @@
 
 <script lang='ts'>
 import { defineComponent, onMounted, ref } from 'vue';
-import { QSpinnerOval, useQuasar } from 'quasar';
+import { QSpinnerIos, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import * as Realm from 'realm-web';
 import * as referralCodes from 'referral-codes';
@@ -62,7 +62,7 @@ export default defineComponent({
         const googleSignIn = async () => {
             $q.loading.show({
                 message: 'Signing in with google...........',
-                spinner: QSpinnerOval,
+                spinner: QSpinnerIos,
                 spinnerSize: 60,
                 backgroundColor: 'light-blue-12'
             });

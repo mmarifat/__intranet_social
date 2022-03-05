@@ -33,15 +33,6 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
-                path: '/point-withdraw',
-                name: 'pointWithdraw',
-                component: () => import('pages/point-withdraw.page.vue'),
-                meta: {
-                    title: 'Point Withdraw',
-                    protected: true
-                }
-            },
-            {
                 path: '/users',
                 name: 'users',
                 component: () => import('pages/users.page.vue'),

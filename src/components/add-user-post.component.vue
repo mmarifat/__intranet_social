@@ -50,7 +50,7 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import { useEmitter } from '../boot/mitt';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
-import { QSpinnerFacebook, useQuasar } from 'quasar';
+import { QSpinnerIos, useQuasar } from 'quasar';
 
 export default defineComponent({
     name: 'AddUserPost',
@@ -155,7 +155,7 @@ export default defineComponent({
                     return;
                 } else {
                     $q.loading.show({
-                        spinner: QSpinnerFacebook,
+                        spinner: QSpinnerIos,
                         message: 'Saving...'
                     });
                     await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts').insertOne({

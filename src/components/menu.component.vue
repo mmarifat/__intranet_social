@@ -21,14 +21,6 @@
                     <q-item-label> Profile</q-item-label>
                 </q-item-section>
             </q-item>
-            <q-item clickable to='/pointWithdraw' exact v-if='currentUserType !== "admin"'>
-                <q-item-section avatar>
-                    <q-icon name='price_check' size='24px' />
-                </q-item-section>
-                <q-item-section>
-                    <q-item-label> Request Point Withdraw</q-item-label>
-                </q-item-section>
-            </q-item>
             <q-item clickable to='/users' exact v-if='currentUserType === "admin"'>
                 <q-item-section avatar>
                     <q-icon name='price_check' size='24px' />

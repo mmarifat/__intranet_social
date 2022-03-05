@@ -55,7 +55,7 @@
 
 <script lang='ts'>
 import { defineComponent, onMounted, ref } from 'vue';
-import { QSpinnerDots, useQuasar } from 'quasar';
+import { QSpinnerIos, useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { GoogleAuth } from '../../src-capacitor/node_modules/@codetrix-studio/capacitor-google-auth';
@@ -90,7 +90,7 @@ export default defineComponent({
         const signOut = async () => {
             $q.loading.show({
                 message: 'Signing in...........',
-                spinner: QSpinnerDots,
+                spinner: QSpinnerIos,
                 spinnerSize: 50
             });
             try {
