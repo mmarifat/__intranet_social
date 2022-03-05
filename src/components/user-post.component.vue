@@ -34,7 +34,7 @@
 
 <script lang='ts'>
 import { defineComponent, onMounted, ref } from 'vue';
-import { useQuasar } from 'quasar';
+import { QSpinnerIos, useQuasar } from 'quasar';
 import { useEmitter } from '../boot/mitt';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 
@@ -44,6 +44,25 @@ export default defineComponent({
         const $q = useQuasar();
         const emitter = useEmitter();
 
+        const lookUpSteps = [
+            {
+                $lookup: {
+                    from: 'users',
+                    let: { realmID_Post: '$realmID' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ['$realmID', '$$realmID_Post'] }
+                            }
+                        },
+                        { $project: { _id: 1, name: 1, imageUrl: 1, invitedBy: 1 } }
+                    ],
+                    as: 'user'
+                }
+            },
+            { $unwind: '$user' }
+        ];
+        const pageSize = ref(5);
         const posts = ref<any[]>([]);
 
         onMounted(() => {
@@ -53,114 +72,107 @@ export default defineComponent({
             });
         });
 
+        const getRemainingPosts = async () => {
+            const alreadyAvailablePostIds = posts.value.map(post => post._id);
+            await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts')
+                ?.aggregate([
+                    { $match: { _id: { $nin: alreadyAvailablePostIds } } },
+                    { $sort: { createdAt: -1 } },
+                    { $limit: pageSize.value },
+                    ...lookUpSteps
+                ]).then(allPosts => {
+                    posts.value.push(...allPosts);
+                });
+        };
+
         const getPosts = async () => {
             posts.value = [];
-            $q.loading.show({ message: 'Loading...' });
+            $q.loading.show({ spinner: QSpinnerIos, spinnerSize: 30 });
 
-            const lookUpSteps = [
-                {
-                    $lookup: {
-                        from: 'users',
-                        let: { realmID_Post: '$realmID' },
-                        pipeline: [
-                            {
-                                $match: {
-                                    $expr: { $eq: ['$realmID', '$$realmID_Post'] }
-                                }
-                            },
-                            { $project: { _id: 1, name: 1, imageUrl: 1, invitedBy: 1 } }
-                        ],
-                        as: 'user'
-                    }
-                },
-                { $unwind: '$user' }
-            ];
-            const getAllPosts = async () => {
-                await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts')
-                    ?.aggregate([
-                        { $sort: { createdAt: -1 } },
-                        { $limit: 100 },
-                        ...lookUpSteps
-                    ]).then(allPosts => {
-                        for (const newPost of allPosts) {
-                            const found = posts.value.findIndex(post => post._id.toString() === newPost._id.toString());
-                            if (found === -1) {
-                                posts.value.push(newPost);
+            const conditionLast10Days = {
+                $expr: {
+                    $gt: [
+                        '$createdAt',
+                        {
+                            $dateSubtract: {
+                                startDate: '$$NOW',
+                                unit: 'day',
+                                amount: 10
                             }
                         }
-                    });
+                    ]
+                }
+            };
+            const getNLevelPosts = async (currentInviteId: any, prevUserId: any) => {
+                if (currentInviteId && prevUserId) {
+                    return await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users')
+                        ?.findOne(
+                            { _id: currentInviteId },
+                            { projection: { _id: 1, realmID: 1, invitedBy: 1 } }
+                        ).then(async nLevelUser => {
+                            currentInviteId = currentInviteId.hasOwnProperty('$oid') ? currentInviteId.$oid : currentInviteId;
+                            if (currentInviteId.toString() !== prevUserId.toString()) {
+                                await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts')
+                                    ?.aggregate([
+                                        {
+                                            $match: {
+                                                $and: [
+                                                    conditionLast10Days,
+                                                    { realmID: nLevelUser.realmID }
+                                                ]
+                                            }
+                                        },
+                                        { $sort: { createdAt: -1 } },
+                                        ...lookUpSteps
+                                    ]).then(response => {
+                                        posts.value.push(...response);
+                                    });
+                            }
+                            return {
+                                nLevelUserID: nLevelUser._id,
+                                nLevelUserInvitedID: nLevelUser.invitedBy
+                            };
+                        });
+                } else {
+                    return {
+                        nLevelUserID: null,
+                        nLevelUserInvitedID: null
+                    };
+                }
             };
 
-            await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users')
-                .findOne(
-                    { _id: realmWebApp.currentUser?.customData?.invitedBy },
-                    { projection: { _id: 1, realmID: 1 } }
-                ).then(async referredUser => {
-                    const currentInviteId = (realmWebApp.currentUser?.customData?.invitedBy as any).$oid;
-
-                    const conditionLast10Days = {
-                        $expr: {
-                            $gt: [
-                                '$createdAt',
-                                {
-                                    $dateSubtract: {
-                                        startDate: '$$NOW',
-                                        unit: 'day',
-                                        amount: 10
-                                    }
-                                }
-                            ]
-                        }
-                    };
-
-                    if (currentInviteId !== realmWebApp.currentUser?.customData?._id) {
-                        await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts')
-                            ?.aggregate([
-                                {
-                                    $match: {
-                                        $and: [
-                                            conditionLast10Days,
-                                            { realmID: referredUser.realmID }
-                                        ]
-                                    }
-                                },
-                                { $sort: { createdAt: -1 } },
-                                ...lookUpSteps
-                            ]).then(response => {
-                                posts.value.push(...response);
-                            }).then(async () => {
-                                await getAllPosts();
-                            });
-                    } else {
-                        await getAllPosts();
-                    }
-                }).finally(() => {
-                    $q.loading.hide();
-                });
-
-
-            /* await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts')
-                 ?.aggregate([
-                     { $sort: { createdAt: -1 } },
-                     { $limit: 100 },
-                     ...lookUpSteps
-                 ]).then(response => {
-                     posts.value.push(...response);
-                 }).finally(() => {
-                     $q.loading.hide();
-                 });*/
+            // level 1 referred posts
+            await getNLevelPosts(
+                realmWebApp.currentUser?.customData?.invitedBy,
+                realmWebApp.currentUser?.customData?._id
+            ).then(async (newUser: any) => {
+                // level 2 referred posts
+                await getNLevelPosts(
+                    newUser.nLevelUserInvitedID,
+                    newUser.nLevelUserID
+                );
+            }).then(async () => {
+                // get all remaining posts
+                await getRemainingPosts();
+            }).finally(() => {
+                $q.loading.hide();
+            });
         };
+
         // eslint-disable-next-line @typescript-eslint/ban-types
         const refresh = (done: Function) => {
             setTimeout(() => {
+                pageSize.value = 0;
                 getPosts();
                 done();
             }, 1000);
         };
         return {
             posts,
-            refresh
+            refresh,
+            getRemainingPosts
         };
     }
-});
+})
+;
 </script>
