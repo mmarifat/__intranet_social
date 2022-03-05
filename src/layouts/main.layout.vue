@@ -9,7 +9,8 @@
                     Intranet Social
                 </q-toolbar-title>
 
-                <div class='cursor-pointer' v-if='$route.name === "dashboard"'>
+                <div class='cursor-pointer'
+                     v-if='$route.name === "dashboard" && currentUser.nid && currentUser.verified === true'>
                     {{ upTime }} <br />
                     <q-tooltip class='bg-light-blue-10' :offset='[10, 10]'>
                         Saved to profile in every 5 minutes
@@ -72,6 +73,7 @@ export default defineComponent({
         const leftDrawerOpen = ref(false);
         const confirmSignOut = ref(false);
         const upTime = ref('00:00');
+        const currentUser = ref(realmWebApp.currentUser?.customData);
 
         onMounted(() => {
             if (!$q.platform.is.capacitor) {
@@ -118,6 +120,7 @@ export default defineComponent({
             leftDrawerOpen,
             confirmSignOut,
             upTime,
+            currentUser,
             signOut
         };
     }

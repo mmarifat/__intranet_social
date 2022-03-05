@@ -96,17 +96,21 @@ export default defineComponent({
         });
 
         Browser.addListener('browserPageLoaded', () => {
-            browserMode.value = new Date();
+            if (currentUser.value.nid && currentUser.value.verified) {
+                browserMode.value = new Date();
+            }
         });
 
         Browser.addListener('browserFinished', () => {
             if (realmWebApp.currentUser?.isLoggedIn) {
-                const newTime = new Date();
-                const seconds = (newTime.getTime() - browserMode.value.getTime()) / 1000;
-                if (seconds) {
-                    const totalInterval = seconds / Number(bonusChart.value?.referInterval);
-                    const pointToInc = calculateIncreaseValue(totalInterval);
-                    updatingReferPoint(pointToInc);
+                if (currentUser.value.nid && currentUser.value.verified) {
+                    const newTime = new Date();
+                    const seconds = (newTime.getTime() - browserMode.value.getTime()) / 1000;
+                    if (seconds) {
+                        const totalInterval = seconds / Number(bonusChart.value?.referInterval);
+                        const pointToInc = calculateIncreaseValue(totalInterval);
+                        updatingReferPoint(pointToInc);
+                    }
                 }
             }
         });
@@ -114,30 +118,34 @@ export default defineComponent({
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         setInterval(async () => {
             if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
-                if (currentUpTime.value < Number(bonusChart.value?.referInterval)) {
-                    currentUpTime.value++;
-                    if (currentUpTime.value % 5 === 0) {
+                if (currentUser.value.nid && currentUser.value.verified) {
+                    if (currentUpTime.value < Number(bonusChart.value?.referInterval)) {
+                        currentUpTime.value++;
+                        if (currentUpTime.value % 5 === 0) {
+                            await Storage.set({
+                                key: currentUser.value?.realmID as string,
+                                value: String(currentUpTime.value)
+                            });
+                        }
+                    } else {
+                        currentUpTime.value = -1;
                         await Storage.set({
                             key: currentUser.value?.realmID as string,
-                            value: String(currentUpTime.value)
+                            value: String(0)
                         });
                     }
-                } else {
-                    currentUpTime.value = -1;
-                    await Storage.set({
-                        key: currentUser.value?.realmID as string,
-                        value: String(0)
-                    });
                 }
             }
         }, 1000);
 
         watch(currentUpTime, async () => {
             if ($q.appVisible && realmWebApp.currentUser?.isLoggedIn) {
-                if (currentUpTime.value === Number(bonusChart.value?.referInterval)) {
-                    const pointToInc = calculateIncreaseValue();
-                    await updatingReferPoint(pointToInc);
-                    await resetTimer();
+                if (currentUser.value.nid && currentUser.value.verified) {
+                    if (currentUpTime.value === Number(bonusChart.value?.referInterval)) {
+                        const pointToInc = calculateIncreaseValue();
+                        await updatingReferPoint(pointToInc);
+                        await resetTimer();
+                    }
                 }
             }
             emitter.emit('up-time', secondsToTime());
