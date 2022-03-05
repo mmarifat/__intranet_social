@@ -1,11 +1,10 @@
 <template>
     <q-page>
         <q-card>
-            <q-img height='150px' width='100%' src='https://cdn.quasar.dev/img/parallax2.jpg' />
-            <q-avatar size='55px' class='absolute' rounded
-                      style='bottom: 0; right: 12px; transform: translateY(-510%);'>
+            <q-avatar size='70px' class='absolute-top-right' rounded style='top: 16%; right: 12px; z-index: 9'>
                 <q-img class='rounded-borders' :src='currentUser.imageUrl' :alt='"image of "+ currentUser._id' />
             </q-avatar>
+            <q-img height='150px' width='100%' src='https://cdn.quasar.dev/img/parallax2.jpg' />
             <q-list>
                 <q-item>
                     <q-item-section avatar>
@@ -153,6 +152,32 @@
                         </q-item-label>
                     </q-item-section>
                 </q-item>
+
+                <q-item>
+                    <q-item-section avatar>
+                        <q-icon color='green' name='timeline' />
+                    </q-item-section>
+
+                    <q-item-section>
+                        <q-item-label>
+                            Transaction Histories
+                            <hr />
+                        </q-item-label>
+                        <q-item-label caption>
+                            <div v-if='!transactionHistories.length'>
+                                No transaction history yet
+                            </div>
+                            <ul v-else style='list-style: decimal; padding-left: 15px'>
+                                <li class='q-pb-xs' v-for='history of transactionHistories' :key='history._id'>
+                                    {{ history.amount }} points on
+                                    {{
+                                        new Date(history.createdAt).toLocaleString()
+                                    }}
+                                </li>
+                            </ul>
+                        </q-item-label>
+                    </q-item-section>
+                </q-item>
             </q-list>
         </q-card>
     </q-page>
@@ -175,6 +200,8 @@ export default defineComponent({
         const totalReward = ref('0');
         const pointWithdrawAmount = ref(5000);
 
+        const transactionHistories = ref<any[]>([]);
+
         onMounted(async () => {
             await getUserData();
         });
@@ -186,6 +213,13 @@ export default defineComponent({
             });
             NID.value = currentUser.value?.nid;
             totalReward.value = Math.round(Number(currentUser.value.reward) + Number(currentUser.value.invitedPoint)).toFixed(2);
+
+            transactionHistories.value = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('transactions').find({
+                realmID
+            }, {
+                sort: { createdAt: -1 },
+                projection: { _id: 1, amount: 1, createdAt: 1, verified: 1 }
+            }) as any[];
         };
 
         const NIDValidation = (e: any) => {
@@ -336,7 +370,8 @@ export default defineComponent({
             totalReward,
             pointWithdrawAmount,
             pointWithdrawValidation,
-            pointWithdraw
+            pointWithdraw,
+            transactionHistories
         };
     }
 });
