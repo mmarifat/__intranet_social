@@ -1,33 +1,36 @@
 <template>
-    <div class='q-pa-sm scroll'>
-        <q-pull-to-refresh
-            @refresh='refresh'
-            color='yellow-9'
-            icon='lightbulb'
-        >
-            <div class='q-mb-sm' v-for='post of posts' :key='post._id'>
-                <q-card flat bordered>
-                    <q-item>
-                        <q-item-section avatar>
-                            <q-avatar>
-                                <img :src='post.user.imageUrl' :alt='"alt of "+post.user._id'>
-                            </q-avatar>
-                        </q-item-section>
+    <div class='q-pa-sm'>
+        <q-pull-to-refresh @refresh='onRefresh' color='yellow-9' icon='lightbulb'>
+            <q-infinite-scroll @load='onPostScroll' :offset='250'>
+                <div class='q-mb-sm' v-for='post of posts' :key='post._id'>
+                    <q-card flat bordered>
+                        <q-item>
+                            <q-item-section avatar>
+                                <q-avatar>
+                                    <img :src='post.user.imageUrl' :alt='"alt of "+post.user._id'>
+                                </q-avatar>
+                            </q-item-section>
 
-                        <q-item-section>
-                            <q-item-label>{{ post.user.name }}</q-item-label>
-                            <q-item-label caption>
-                                {{ new Date(post.createdAt).toLocaleString() }}
-                            </q-item-label>
-                        </q-item-section>
-                    </q-item>
-                    <q-separator />
+                            <q-item-section>
+                                <q-item-label>{{ post.user.name }}</q-item-label>
+                                <q-item-label caption>
+                                    {{ new Date(post.createdAt).toLocaleString() }}
+                                </q-item-label>
+                            </q-item-section>
+                        </q-item>
+                        <q-separator />
 
-                    <q-card-section horizontal>
-                        <q-card-section v-html='post.content' />
-                    </q-card-section>
-                </q-card>
-            </div>
+                        <q-card-section horizontal>
+                            <q-card-section v-html='post.content' />
+                        </q-card-section>
+                    </q-card>
+                </div>
+                <template v-slot:loading>
+                    <div class='row justify-center q-my-md'>
+                        <q-spinner-dots color='primary' size='40px' />
+                    </div>
+                </template>
+            </q-infinite-scroll>
         </q-pull-to-refresh>
     </div>
 </template>
@@ -62,7 +65,7 @@ export default defineComponent({
             },
             { $unwind: '$user' }
         ];
-        const pageSize = ref(5);
+        const pageSize = ref(50);
         const posts = ref<any[]>([]);
 
         onMounted(() => {
@@ -160,17 +163,36 @@ export default defineComponent({
         };
 
         // eslint-disable-next-line @typescript-eslint/ban-types
-        const refresh = (done: Function) => {
+        const onRefresh = (done: Function) => {
             setTimeout(() => {
-                pageSize.value = 0;
-                getPosts();
-                done();
+                getPosts().then(() => {
+                    done();
+                });
             }, 1000);
         };
+
+        // eslint-disable-next-line @typescript-eslint/ban-types
+        const onPostScroll = (index: number, done: Function) => {
+            setTimeout(() => {
+                // console.log('now', index);
+                const prevPostsLength = posts.value.length;
+                getRemainingPosts().then(() => {
+                    const afterPostsLength = posts.value.length;
+                    if (prevPostsLength !== afterPostsLength) {
+                        done();
+                    } else {
+                        // 'true' to stop the infinite scroll
+                        done(true);
+                    }
+                });
+                done();
+            }, 2000);
+        };
+
         return {
             posts,
-            refresh,
-            getRemainingPosts
+            onRefresh,
+            onPostScroll
         };
     }
 })
