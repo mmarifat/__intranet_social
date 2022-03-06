@@ -29,6 +29,14 @@
                     <q-item-label> Users Corner</q-item-label>
                 </q-item-section>
             </q-item>
+            <q-item clickable to='/transactions' exact v-if='currentUserType === "admin"'>
+                <q-item-section avatar>
+                    <q-icon name='receipt' size='24px' />
+                </q-item-section>
+                <q-item-section>
+                    <q-item-label> Transactions</q-item-label>
+                </q-item-section>
+            </q-item>
         </q-item-section>
     </q-list>
 </template>

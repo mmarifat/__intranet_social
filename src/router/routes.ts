@@ -41,6 +41,16 @@ const routes: RouteRecordRaw[] = [
                     protected: true,
                     adminOnly: true
                 }
+            },
+            {
+                path: '/transactions',
+                name: 'transactions',
+                component: () => import('pages/transactions.page.vue'),
+                meta: {
+                    title: 'Transactions',
+                    protected: true,
+                    adminOnly: true
+                }
             }
         ]
     },

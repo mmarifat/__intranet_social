@@ -173,6 +173,10 @@
                                     {{
                                         new Date(history.createdAt).toLocaleString()
                                     }}
+                                    <q-chip class='glossy' square :color="history.verified === true ? 'teal' : 'red'"
+                                            dense size='12px' text-color='white' icon='bookmark'>
+                                        {{ history.verified === true ? 'Done' : 'Processing' }}
+                                    </q-chip>
                                 </li>
                             </ul>
                         </q-item-label>
