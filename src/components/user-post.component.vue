@@ -103,7 +103,6 @@ export default defineComponent({
                             posts.value.push(post);
                         }
                     }
-                    posts.value.push(...allPosts);
                 });
         };
 
