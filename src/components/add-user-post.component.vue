@@ -1,7 +1,7 @@
 <template>
     <q-dialog v-model='dialog' persistent maximized>
-        <q-card class='row justify-center bg-light-blue-2'>
-            <q-card-section class='col-12'>
+        <q-card square class='bg-light-blue-2'>
+            <q-card-section class='q-pa-none'>
                 <q-form
                     greedy
                     @submit.prevent='save'
@@ -9,18 +9,37 @@
                     autocapitalize='off'
                     autocomplete='off'
                 >
-                    <q-card-section class='text-bold text-h5 text-center q-pb-none'>
+                    <q-card-section class='text-bold text-h5 text-center q-pa-xs'>
                         New Post
                     </q-card-section>
 
-                    <q-card-section class='q-px-none'>
+                    <q-card square class='row text-center q-px-md q-pb-md'>
+                        <div class='col-6 text-left row items-center'>
+                            <span>Attachment</span>
+                        </div>
+                        <div class='col-6 text-right'>
+                            <q-toggle v-model='isVideo' label='Video' left-label icon='check_box' />
+                        </div>
+                        <div class='col-12' v-if='isVideo'>
+                            <q-input square outlined v-model='postLink' label='Youtube Url'
+                                     :rules='[validateYouTubeUrl]' />
+                        </div>
+                        <div class='col-12' v-if='!isVideo'>
+                            <q-input square outlined v-model='postLink' label='Image Link'
+                                     :rules='[validateImageUrl]' />
+                        </div>
+                    </q-card>
+
+                    <q-card-section class='q-px-none q-pt-none'>
                         <q-editor
                             flat
-                            :fullscreen='true'
+                            square
+                            :fullscreen='false'
                             content-class='bg-transparent'
                             toolbar-text-color='white'
                             toolbar-toggle-color='yellow-8'
                             toolbar-bg='light-blue-10'
+                            min-height='25rem'
                             v-model='postContent'
                             :toolbar='kitchenSink.toolbal'
                             :fonts='kitchenSink.fonts'
@@ -47,7 +66,7 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 import { useEmitter } from '../boot/mitt';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { QSpinnerIos, useQuasar } from 'quasar';
@@ -59,6 +78,8 @@ export default defineComponent({
         const emitter = useEmitter();
 
         const dialog = ref(false);
+        const isVideo = ref(false);
+        const postLink = ref('');
         const postContent = ref('');
         const kitchenSink = ref({
             toolbal: [
@@ -154,12 +175,54 @@ export default defineComponent({
                     });
                     return;
                 } else {
+                    const linkPayload = {
+                        isVideo: isVideo.value,
+                        link: ''
+                    };
+                    if (isVideo.value) {
+                        if (postLink.value) {
+                            if (validateYouTubeUrl(postLink.value) != 'Require valid youtube url') {
+                                const getVideoId = (url: string) => {
+                                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                                    const match = regExp.exec(url);
+                                    return (match && match[2].length === 11) ? match[2] : '';
+                                };
+                                linkPayload.link = `https://youtube.com/embed/${getVideoId(postLink.value)}`;
+                            } else {
+                                $q.notify({
+                                    type: 'negative',
+                                    textColor: 'white',
+                                    message: 'Invalid YouTube URL',
+                                    position: 'top',
+                                    timeout: 2000
+                                });
+                                return;
+                            }
+                        }
+                    }
+                    if (!isVideo.value) {
+                        if (postLink.value) {
+                            if (validateImageUrl(postLink.value) != 'Require valid image url') {
+                                linkPayload.link = postLink.value;
+                            } else {
+                                $q.notify({
+                                    type: 'negative',
+                                    textColor: 'white',
+                                    message: 'Invalid Image Link',
+                                    position: 'top',
+                                    timeout: 2000
+                                });
+                                return;
+                            }
+                        }
+                    }
                     $q.loading.show({
                         spinner: QSpinnerIos,
                         message: 'Saving...'
                     });
                     await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts').insertOne({
                         content: postContent.value,
+                        link: linkPayload,
                         createdAt: new Date(),
                         realmID: realmWebApp.currentUser?.id
                     }).then(() => {
@@ -190,11 +253,44 @@ export default defineComponent({
         const close = () => {
             dialog.value = false;
             postContent.value = '';
+            isVideo.value = false;
+            postLink.value = '';
         };
+
+        const validateYouTubeUrl = (url: string): boolean | string => {
+            if (url != undefined || url != '') {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
+                const match = regExp.exec(url);
+                if (match && match[2].length == 11) {
+                    return true;
+                }
+            }
+            return 'Require valid youtube url';
+        };
+
+        const validateImageUrl = (url: string): boolean | string => {
+            if (url != undefined || url != '') {
+                const regExp = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/;
+                const match = regExp.exec(url);
+                if (match) {
+                    return true;
+                }
+            }
+            return 'Require valid image url';
+        };
+
+        watch(isVideo, () => {
+            postLink.value = '';
+        });
+
         return {
             dialog,
             kitchenSink,
+            isVideo,
+            postLink,
             postContent,
+            validateYouTubeUrl,
+            validateImageUrl,
             close,
             save
         };

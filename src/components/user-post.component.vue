@@ -20,7 +20,20 @@
                         </q-item>
                         <q-separator />
 
-                        <q-card-section horizontal>
+                        <q-card-section horizontal class='column'>
+                            <q-img
+                                v-if='!post.link.isVideo && post.link.link'
+                                :src='post.link.link'
+                                fit='fill'
+                                :ratio='16/9'
+                                height='200px'
+                                weight='200px'
+                            />
+                            <q-video
+                                v-if='post.link.isVideo && post.link.link'
+                                :src='post.link.link'
+                                :ratio='16/9'
+                            />
                             <q-card-section v-html='post.content' />
                         </q-card-section>
                     </q-card>
@@ -84,6 +97,12 @@ export default defineComponent({
                     { $limit: pageSize.value },
                     ...lookUpSteps
                 ]).then(allPosts => {
+                    for (const post of (allPosts.length > 0 ? allPosts : [])) {
+                        const foundIndex = posts.value.findIndex(p => p._id === post._id);
+                        if (foundIndex === -1) {
+                            posts.value.push(post);
+                        }
+                    }
                     posts.value.push(...allPosts);
                 });
         };
@@ -106,6 +125,7 @@ export default defineComponent({
                     ]
                 }
             };
+
             const getNLevelPosts = async (currentInviteId: any, prevUserId: any) => {
                 if (currentInviteId && prevUserId) {
                     return await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users')
@@ -128,7 +148,12 @@ export default defineComponent({
                                         { $sort: { createdAt: -1 } },
                                         ...lookUpSteps
                                     ]).then(response => {
-                                        posts.value.push(...response);
+                                        for (const responseElement of (response.length > 0 ? response : [])) {
+                                            const foundIndex = posts.value.findIndex(post => post._id === responseElement._id);
+                                            if (foundIndex === -1) {
+                                                posts.value.push(responseElement);
+                                            }
+                                        }
                                     });
                             }
                             return {
@@ -174,7 +199,6 @@ export default defineComponent({
         // eslint-disable-next-line @typescript-eslint/ban-types
         const onPostScroll = (index: number, done: Function) => {
             setTimeout(() => {
-                // console.log('now', index);
                 const prevPostsLength = posts.value.length;
                 getRemainingPosts().then(() => {
                     const afterPostsLength = posts.value.length;
