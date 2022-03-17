@@ -24,7 +24,9 @@
         "mongo-dot-notation": "^2.0.0",
         "quasar": "^2.0.0",
         "realm-web": "^1.5.1",
-        "referral-codes": "^1.0.2"
+        "referral-codes": "^1.0.2",
+        "vue": "^3.0.0",
+        "vue-router": "^4.0.0"
     },
     "devDependencies": {
         "@babel/eslint-parser": "^7.13.14",

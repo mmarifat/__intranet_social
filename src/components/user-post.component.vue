@@ -22,19 +22,21 @@
 
                         <q-card-section horizontal class='column'>
                             <q-img
-                                v-if='!post.link.isVideo && post.link.link'
-                                :src='post.link.link'
+                                v-if='!!post.link.image'
+                                :src='post.link.image'
                                 fit='fill'
                                 :ratio='16/9'
                                 height='200px'
                                 weight='200px'
                             />
                             <q-video
-                                v-if='post.link.isVideo && post.link.link'
-                                :src='post.link.link'
+                                v-if='!!post.link.youtube'
+                                :src='post.link.youtube'
                                 :ratio='16/9'
                             />
-                            <q-card-section v-html='post.content' />
+                            <q-card-section>
+                                {{ post.content }}
+                            </q-card-section>
                         </q-card-section>
                     </q-card>
                 </div>

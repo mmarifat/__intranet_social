@@ -4,7 +4,7 @@
             <q-card-section class='q-pa-none'>
                 <q-form
                     greedy
-                    @submit.prevent='save'
+                    @submit='save'
                     autocorrect='off'
                     autocapitalize='off'
                     autocomplete='off'
@@ -13,52 +13,33 @@
                         New Post
                     </q-card-section>
 
-                    <q-card square class='row text-center q-px-md q-pb-md'>
-                        <div class='col-6 text-left row items-center'>
-                            <span>Attachment</span>
+                    <q-card square class='row q-px-md q-pt-md'>
+                        <div class='col-12'>
+                            <q-input square outlined v-model='postYoutube' label='Youtube Url'
+                                     :rules='[validateYouTubeUrl]'/>
                         </div>
-                        <div class='col-6 text-right'>
-                            <q-toggle v-model='isVideo' label='Video' left-label icon='check_box' />
+                        <div class='col-12'>
+                            <q-input square outlined v-model='postImage' label='Image Link'
+                                     :rules='[validateImageUrl]'/>
                         </div>
-                        <div class='col-12' v-if='isVideo'>
-                            <q-input square outlined v-model='postLink' label='Youtube Url'
-                                     :rules='[validateYouTubeUrl]' />
+                        <div class='col-12'>
+                            <q-input type="textarea" rows="15" hint="Share your story" square outlined
+                                     v-model='postContent'/>
                         </div>
-                        <div class='col-12' v-if='!isVideo'>
-                            <q-input square outlined v-model='postLink' label='Image Link'
-                                     :rules='[validateImageUrl]' />
-                        </div>
-                    </q-card>
 
-                    <q-card-section class='q-px-none q-pt-none'>
-                        <q-editor
-                            flat
-                            square
-                            :fullscreen='false'
-                            content-class='bg-transparent'
-                            toolbar-text-color='white'
-                            toolbar-toggle-color='yellow-8'
-                            toolbar-bg='light-blue-10'
-                            min-height='25rem'
-                            v-model='postContent'
-                            :toolbar='kitchenSink.toolbal'
-                            :fonts='kitchenSink.fonts'
-                            :definitions="{
-                                    close: {
-                                      tip: 'Discard your changes',
-                                      icon: 'close',
-                                      label: 'Discard',
-                                      handler: close
-                                    },
-                                    save: {
-                                      tip: 'Save your post',
-                                      icon: 'save',
-                                      label: 'Save',
-                                      handler: save
-                                    },
-                                }"
-                        />
-                    </q-card-section>
+                        <q-card-actions class="q-pt-md q-pb-sm col-12 text-right justify-end">
+                            <q-btn dense color="red" label="Close" @click="close">
+                                <q-tooltip>
+                                    Discard your changes
+                                </q-tooltip>
+                            </q-btn>
+                            <q-btn dense color="primary" label="Save" type="submit">
+                                <q-tooltip>
+                                    Save your changes
+                                </q-tooltip>
+                            </q-btn>
+                        </q-card-actions>
+                    </q-card>
                 </q-form>
             </q-card-section>
         </q-card>
@@ -66,7 +47,7 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useEmitter } from '../boot/mitt';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { QSpinnerIos, useQuasar } from 'quasar';
@@ -78,84 +59,9 @@ export default defineComponent({
         const emitter = useEmitter();
 
         const dialog = ref(false);
-        const isVideo = ref(false);
-        const postLink = ref('');
+        const postImage = ref('');
+        const postYoutube = ref('');
         const postContent = ref('');
-        const kitchenSink = ref({
-            toolbal: [
-                [
-                    {
-                        label: $q.lang.editor.align,
-                        icon: $q.iconSet.editor.align,
-                        fixedLabel: true,
-                        options: ['left', 'center', 'right', 'justify']
-                    },
-                    'bold', 'italic', 'strike', 'underline', 'subscript', 'superscript',
-                    'token', 'hr', 'link', 'custom_btn', 'fullscreen',
-                    'quote', 'unordered', 'ordered', 'outdent', 'indent',
-                    {
-                        label: $q.lang.editor.formatting,
-                        icon: $q.iconSet.editor.formatting,
-                        list: 'no-icons',
-                        options: [
-                            'p',
-                            'h1',
-                            'h2',
-                            'h3',
-                            'h4',
-                            'h5',
-                            'h6',
-                            'code'
-                        ]
-                    },
-                    {
-                        label: $q.lang.editor.fontSize,
-                        icon: $q.iconSet.editor.fontSize,
-                        fixedLabel: true,
-                        fixedIcon: true,
-                        list: 'no-icons',
-                        options: [
-                            'size-1',
-                            'size-2',
-                            'size-3',
-                            'size-4',
-                            'size-5',
-                            'size-6',
-                            'size-7'
-                        ]
-                    },
-                    {
-                        label: $q.lang.editor.defaultFont,
-                        icon: $q.iconSet.editor.font,
-                        fixedIcon: true,
-                        list: 'no-icons',
-                        options: [
-                            'default_font',
-                            'arial',
-                            'arial_black',
-                            'comic_sans',
-                            'courier_new',
-                            'impact',
-                            'lucida_grande',
-                            'times_new_roman',
-                            'verdana'
-                        ]
-                    },
-                    'undo', 'redo', 'removeFormat', 'viewsource',
-                    'close', 'save'
-                ]
-            ],
-            fonts: {
-                arial: 'Arial',
-                arial_black: 'Arial Black',
-                comic_sans: 'Comic Sans MS',
-                courier_new: 'Courier New',
-                impact: 'Impact',
-                lucida_grande: 'Lucida Grande',
-                times_new_roman: 'Times New Roman',
-                verdana: 'Verdana'
-            }
-        });
 
         onMounted(() => {
             emitter.on('open-add-user-post-dialog', (stat: boolean) => {
@@ -165,7 +71,7 @@ export default defineComponent({
         });
         const save = async () => {
             if (realmWebApp.currentUser?.isLoggedIn) {
-                if (!postContent.value) {
+                if (!postContent.value && !postImage.value && !postYoutube.value) {
                     $q.notify({
                         type: 'negative',
                         textColor: 'white',
@@ -176,44 +82,40 @@ export default defineComponent({
                     return;
                 } else {
                     const linkPayload = {
-                        isVideo: isVideo.value,
-                        link: ''
+                        youtube: '',
+                        image: ''
                     };
-                    if (isVideo.value) {
-                        if (postLink.value) {
-                            if (validateYouTubeUrl(postLink.value) != 'Require valid youtube url') {
-                                const getVideoId = (url: string) => {
-                                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-                                    const match = regExp.exec(url);
-                                    return (match && match[2].length === 11) ? match[2] : '';
-                                };
-                                linkPayload.link = `https://youtube.com/embed/${getVideoId(postLink.value)}`;
-                            } else {
-                                $q.notify({
-                                    type: 'negative',
-                                    textColor: 'white',
-                                    message: 'Invalid YouTube URL',
-                                    position: 'top',
-                                    timeout: 2000
-                                });
-                                return;
-                            }
+                    if (postYoutube.value) {
+                        if (validateYouTubeUrl(postYoutube.value) != 'Require valid youtube url') {
+                            const getVideoId = (url: string) => {
+                                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                                const match = regExp.exec(url);
+                                return (match && match[2].length === 11) ? match[2] : '';
+                            };
+                            linkPayload.youtube = `https://youtube.com/embed/${getVideoId(postYoutube.value)}`;
+                        } else {
+                            $q.notify({
+                                type: 'negative',
+                                textColor: 'white',
+                                message: 'Invalid YouTube URL',
+                                position: 'top',
+                                timeout: 2000
+                            });
+                            return;
                         }
                     }
-                    if (!isVideo.value) {
-                        if (postLink.value) {
-                            if (validateImageUrl(postLink.value) != 'Require valid image url') {
-                                linkPayload.link = postLink.value;
-                            } else {
-                                $q.notify({
-                                    type: 'negative',
-                                    textColor: 'white',
-                                    message: 'Invalid Image Link',
-                                    position: 'top',
-                                    timeout: 2000
-                                });
-                                return;
-                            }
+                    if (postImage.value) {
+                        if (validateImageUrl(postImage.value) != 'Require valid image url') {
+                            linkPayload.image = postImage.value;
+                        } else {
+                            $q.notify({
+                                type: 'negative',
+                                textColor: 'white',
+                                message: 'Invalid Image Link',
+                                position: 'top',
+                                timeout: 2000
+                            });
+                            return;
                         }
                     }
                     $q.loading.show({
@@ -253,8 +155,8 @@ export default defineComponent({
         const close = () => {
             dialog.value = false;
             postContent.value = '';
-            isVideo.value = false;
-            postLink.value = '';
+            postYoutube.value = '';
+            postImage.value = '';
         };
 
         const validateYouTubeUrl = (url: string): boolean | string => {
@@ -263,9 +165,12 @@ export default defineComponent({
                 const match = regExp.exec(url);
                 if (match && match[2].length == 11) {
                     return true;
+                } else {
+                    return 'Require valid youtube url';
                 }
+            } else {
+                return true;
             }
-            return 'Require valid youtube url';
         };
 
         const validateImageUrl = (url: string): boolean | string => {
@@ -274,20 +179,18 @@ export default defineComponent({
                 const match = regExp.exec(url);
                 if (match) {
                     return true;
+                } else {
+                    return 'Require valid image url';
                 }
+            } else {
+                return true;
             }
-            return 'Require valid image url';
         };
-
-        watch(isVideo, () => {
-            postLink.value = '';
-        });
 
         return {
             dialog,
-            kitchenSink,
-            isVideo,
-            postLink,
+            postImage,
+            postYoutube,
             postContent,
             validateYouTubeUrl,
             validateImageUrl,

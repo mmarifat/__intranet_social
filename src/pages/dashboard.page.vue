@@ -8,9 +8,6 @@
                 </div>
                 <div class='col col-8 text-right'>
                     <div class='text-h5 q-mt-sm q-mb-xs'>{{ currentUser.name }}</div>
-                    <!--                        <div class='text-caption text-grey'>
-                                                {{ currentUser.email }}
-                                            </div>-->
                     <div class='q-py-sm text-grey'>
                         <div>
                             Invite Code: <span class='text-bold'> {{ currentUser.inviteCode }} </span>

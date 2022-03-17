@@ -77,7 +77,7 @@ export default defineComponent({
 
         onMounted(() => {
             if (!$q.platform.is.capacitor) {
-                GoogleAuth.init();
+                GoogleAuth.initialize();
             }
             emitter.on('up-time', (time: string) => {
                 upTime.value = time;

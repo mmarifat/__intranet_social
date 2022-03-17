@@ -48,7 +48,7 @@ export default defineComponent({
 
         onMounted(() => {
             if (!$q.platform.is.capacitor) {
-                GoogleAuth.init();
+                GoogleAuth.initialize();
             }
             checkGoogleLoggedInStatus();
         });
