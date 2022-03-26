@@ -21,6 +21,9 @@
                         <q-separator />
 
                         <q-card-section horizontal class='column'>
+                            <q-card-section>
+                                {{ post.content }}
+                            </q-card-section>
                             <q-img
                                 v-if='!!post.link.image'
                                 :src='post.link.image'
@@ -34,9 +37,6 @@
                                 :src='post.link.youtube'
                                 :ratio='16/9'
                             />
-                            <q-card-section>
-                                {{ post.content }}
-                            </q-card-section>
                         </q-card-section>
                     </q-card>
                 </div>
@@ -134,33 +134,40 @@ export default defineComponent({
                             { _id: currentInviteId },
                             { projection: { _id: 1, realmID: 1, invitedBy: 1 } }
                         ).then(async nLevelUser => {
-                            currentInviteId = currentInviteId.hasOwnProperty('$oid') ? currentInviteId.$oid : currentInviteId;
-                            if (currentInviteId.toString() !== prevUserId.toString()) {
-                                await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts')
-                                    ?.aggregate([
-                                        {
-                                            $match: {
-                                                $and: [
-                                                    conditionLast10Days,
-                                                    { realmID: nLevelUser.realmID }
-                                                ]
+                            if (nLevelUser) {
+                                currentInviteId = currentInviteId.hasOwnProperty('$oid') ? currentInviteId.$oid : currentInviteId;
+                                if (currentInviteId.toString() !== prevUserId.toString()) {
+                                    await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('posts')
+                                        ?.aggregate([
+                                            {
+                                                $match: {
+                                                    $and: [
+                                                        conditionLast10Days,
+                                                        { realmID: nLevelUser.realmID }
+                                                    ]
+                                                }
+                                            },
+                                            { $sort: { createdAt: -1 } },
+                                            ...lookUpSteps
+                                        ]).then(response => {
+                                            for (const responseElement of (response.length > 0 ? response : [])) {
+                                                const foundIndex = posts.value.findIndex(post => post._id === responseElement._id);
+                                                if (foundIndex === -1) {
+                                                    posts.value.push(responseElement);
+                                                }
                                             }
-                                        },
-                                        { $sort: { createdAt: -1 } },
-                                        ...lookUpSteps
-                                    ]).then(response => {
-                                        for (const responseElement of (response.length > 0 ? response : [])) {
-                                            const foundIndex = posts.value.findIndex(post => post._id === responseElement._id);
-                                            if (foundIndex === -1) {
-                                                posts.value.push(responseElement);
-                                            }
-                                        }
-                                    });
+                                        });
+                                }
+                                return {
+                                    nLevelUserID: nLevelUser._id,
+                                    nLevelUserInvitedID: nLevelUser.invitedBy
+                                };
+                            } else {
+                                return {
+                                    nLevelUserID: null,
+                                    nLevelUserInvitedID: null
+                                };
                             }
-                            return {
-                                nLevelUserID: nLevelUser._id,
-                                nLevelUserInvitedID: nLevelUser.invitedBy
-                            };
                         });
                 } else {
                     return {

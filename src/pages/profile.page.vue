@@ -4,7 +4,7 @@
             <q-avatar size='70px' class='absolute-top-right' rounded style='top: 16%; right: 12px; z-index: 9'>
                 <q-img class='rounded-borders' :src='currentUser.imageUrl' :alt='"image of "+ currentUser._id' />
             </q-avatar>
-            <q-img height='150px' width='100%' src='https://cdn.quasar.dev/img/parallax2.jpg' />
+            <q-img height='150px' width='100%' :src='randomUserImage()' />
             <q-list>
                 <q-item>
                     <q-item-section avatar>
@@ -366,6 +366,17 @@ export default defineComponent({
             pointWithdrawAmount.value = 5000;
         };
 
+        const randomUserImage = (): string => {
+            const MAX_IMAGES = 200;
+            const ID = rand(1, MAX_IMAGES);
+
+            function rand(min: number, max: number) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            return `https://picsum.photos/id/${ID}/300/550`;
+        };
+
         return {
             currentUser,
             NID,
@@ -375,7 +386,8 @@ export default defineComponent({
             pointWithdrawAmount,
             pointWithdrawValidation,
             pointWithdraw,
-            transactionHistories
+            transactionHistories,
+            randomUserImage
         };
     }
 });

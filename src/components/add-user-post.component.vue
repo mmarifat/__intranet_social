@@ -3,7 +3,6 @@
         <q-card square class='bg-light-blue-2'>
             <q-card-section class='q-pa-none'>
                 <q-form
-                    greedy
                     @submit='save'
                     autocorrect='off'
                     autocapitalize='off'
@@ -14,26 +13,34 @@
                     </q-card-section>
 
                     <q-card square class='row q-px-md q-pt-md'>
-                        <div class='col-12'>
-                            <q-input square outlined v-model='postYoutube' label='Youtube Url'
-                                     :rules='[validateYouTubeUrl]'/>
-                        </div>
-                        <div class='col-12'>
-                            <q-input square outlined v-model='postImage' label='Image Link'
-                                     :rules='[validateImageUrl]'/>
-                        </div>
-                        <div class='col-12'>
-                            <q-input type="textarea" rows="15" hint="Share your story" square outlined
-                                     v-model='postContent'/>
+                        <div class='col-12 q-mb-sm'>
+                            <q-input type='textarea' rows='15' hint='Share your story' square outlined
+                                     v-model='postContent' />
                         </div>
 
-                        <q-card-actions class="q-pt-md q-pb-sm col-12 text-right justify-end">
-                            <q-btn dense color="red" label="Close" @click="close">
+                        <div class='col-12'>
+                            <p>
+                                You can <a href='javascript:void(0)' @click='openImgbb()'>
+                                upload image here
+                            </a>
+                                and copy paste the link
+                            </p>
+                            <q-input square outlined v-model='postImage' label='Image Link'
+                                     :rules='[validateImageUrl]' />
+                        </div>
+
+                        <div class='col-12'>
+                            <q-input square outlined v-model='postYoutube' label='Youtube Url'
+                                     :rules='[validateYouTubeUrl]' />
+                        </div>
+
+                        <q-card-actions class='q-pt-md q-pb-sm col-12 text-right justify-center'>
+                            <q-btn dense color='red' label='Close' @click='close'>
                                 <q-tooltip>
                                     Discard your changes
                                 </q-tooltip>
                             </q-btn>
-                            <q-btn dense color="primary" label="Save" type="submit">
+                            <q-btn dense color='primary' label='Save' type='submit'>
                                 <q-tooltip>
                                     Save your changes
                                 </q-tooltip>
@@ -51,6 +58,7 @@ import { defineComponent, onMounted, ref } from 'vue';
 import { useEmitter } from '../boot/mitt';
 import { realmWebApp } from '../custom/funtions/RealmWebClient';
 import { QSpinnerIos, useQuasar } from 'quasar';
+import { Browser } from '../../src-capacitor/node_modules/@capacitor/browser';
 
 export default defineComponent({
     name: 'AddUserPost',
@@ -160,7 +168,7 @@ export default defineComponent({
         };
 
         const validateYouTubeUrl = (url: string): boolean | string => {
-            if (url != undefined || url != '') {
+            if (!!url || url != '') {
                 const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\?v=)([^#\&\?]*).*/;
                 const match = regExp.exec(url);
                 if (match && match[2].length == 11) {
@@ -174,7 +182,7 @@ export default defineComponent({
         };
 
         const validateImageUrl = (url: string): boolean | string => {
-            if (url != undefined || url != '') {
+            if (!!url || url != '') {
                 const regExp = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)/;
                 const match = regExp.exec(url);
                 if (match) {
@@ -187,6 +195,12 @@ export default defineComponent({
             }
         };
 
+        const openImgbb = async () => {
+            await Browser.open({
+                url: 'https://imgbb.com/'
+            });
+        };
+
         return {
             dialog,
             postImage,
@@ -195,7 +209,8 @@ export default defineComponent({
             validateYouTubeUrl,
             validateImageUrl,
             close,
-            save
+            save,
+            openImgbb
         };
     }
 })
