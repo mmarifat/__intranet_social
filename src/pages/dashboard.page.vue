@@ -48,7 +48,7 @@
             <q-tooltip>
                 Click to add new post
             </q-tooltip>
-            <q-btn round size='12px' icon='add' color='light-blue-10' @click='openAddUserPostDialog' />
+            <q-btn class='q-mr-sm' round size='15px' icon='add' color='light-blue-9' @click='openAddUserPostDialog' />
         </q-page-sticky>
     </q-page>
 </template>

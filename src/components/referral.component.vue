@@ -98,6 +98,8 @@ export default defineComponent({
                 codeLoading.value = true;
                 const result = await realmWebApp.currentUser?.mongoClient('mongodb-atlas').db('intranet-social')?.collection('users').findOne({
                     inviteCode: refCode.value,
+                    nid: { $exists: true, $ne: null },
+                    verified: true,
                     realmID: { $ne: realmWebApp.currentUser?.id }
                 });
                 if (!!result) {
